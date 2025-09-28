@@ -398,4 +398,397 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXAARA - Where Quality Meets You</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide-static@latest/dist/lucide.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        main { flex-grow: 1; }
+        .hidden { display: none; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        #toast {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%); padding: 12px 24px;
+            border-radius: 8px; background-color: #1a202c; color: white;
+            z-index: 100; transition: all 0.5s; visibility: hidden;
+            opacity: 0; transform: translate(-50%, 10px);
+        }
+        #toast.show { visibility: visible; opacity: 1; transform: translate(-50%, 0); }
+        input[type='number']::-webkit-inner-spin-button,
+        input[type='number']::-webkit-outer-spin-button {
+            -webkit-appearance: none; margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="toast"></div>
+
+    <!-- Header Section -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex-shrink-0">
+                    <a href="#" onclick="app.navigateTo('home')" class="text-3xl font-extrabold text-gray-900 tracking-tighter">NEXAARA</a>
+                </div>
+                <div class="hidden lg:block">
+                    <div class="ml-10 flex items-baseline space-x-6">
+                        <a href="#" onclick="app.navigateTo('home')" class="text-gray-600 hover:text-orange-600 transition-colors duration-200 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="#" onclick="app.navigateTo('shop')" class="text-gray-600 hover:text-orange-600 transition-colors duration-200 px-3 py-2 rounded-md text-sm font-medium">Shop</a>
+                    </div>
+                </div>
+                 <div class="flex items-center">
+                    <div class="relative hidden md:block">
+                        <input type="text" id="search-bar" onkeyup="app.navigateTo('shop', { searchQuery: this.value })" placeholder="Search products..." class="w-48 lg:w-64 pl-4 pr-10 py-2 border rounded-full bg-gray-100 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i data-lucide="search" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <button class="ml-2 p-2 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-100" onclick="app.navigateTo('account')">
+                         <i data-lucide="user" class="h-5 w-5"></i>
+                    </button>
+                    <button class="ml-2 p-2 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-100 relative" onclick="app.navigateTo('cart')">
+                        <i data-lucide="shopping-cart" class="h-5 w-5"></i>
+                        <span id="cart-count" class="absolute top-0 right-0 block h-5 w-5 rounded-full bg-orange-600 text-white text-xs flex items-center justify-center">0</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div id="home-view"></div>
+        <div id="shop-view" class="hidden"></div>
+        <div id="product-detail-view" class="hidden"></div>
+        <div id="cart-view" class="hidden"></div>
+        <div id="checkout-view" class="hidden"></div>
+        <div id="confirmation-view" class="hidden"></div>
+        <div id="account-view" class="hidden"></div>
+        <div id="admin-view" class="hidden"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+             <div class="mt-8 border-t border-gray-700 pt-8 text-center">
+                <p class="text-base text-gray-400">&copy; 2025 NEXAARA. All Rights Reserved. | <a href="#" onclick="app.navigateTo('admin')" class="hover:underline">Admin Panel</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="text/javascript">
+        const app = {
+            state: {
+                products: [], cart: [], orders: [],
+                currentPage: 'home', currentProduct: null, editingProductId: null,
+                shopFilters: { searchQuery: '', category: 'All', sortBy: 'default' }
+            },
+
+            init() {
+                this.loadProductsFromStorage();
+                if(this.state.products.length === 0) this.seedInitialProducts();
+                this.loadCartFromStorage();
+                this.loadOrdersFromStorage();
+                this.navigateTo('home');
+                this.updateCartCount();
+            },
+            
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            },
+            
+            seedInitialProducts() {
+                const initialProducts = [
+                    { id: 1, name: 'NEXAARA® Minimal Luxe Hoodie', price: 58.10, image: 'https://placehold.co/500x500/111827/white?text=NEXAARA', category: 'Apparel', description: 'Premium soft-spun cotton hoodie with a minimalist embroidered logo. Perfect for a clean, modern look.' },
+                    { id: 2, name: 'Mountain Pendant Necklace', price: 25.19, image: 'https://placehold.co/500x500/f3f4f6/111827?text=Peak', category: 'Accessories', description: 'Stainless steel circular pendant with a mountain range engraving. A reminder to always seek your peak.' },
+                    { id: 3, name: 'Unisex Classic Pullover Hoodie', price: 43.04, image: 'https://placehold.co/500x500/ffffff/111827?text=Peak', category: 'Apparel', description: 'A comfortable and stylish unisex hoodie featuring the "Find Your Peak" graphic. Made for everyday adventures.' },
+                    { id: 4, name: 'Find Your, Peak | Die Cut Sticker', price: 7.54, image: 'https://placehold.co/500x500/f3f4f6/111827?text=Peak', category: 'Accessories', description: 'High-quality, weather-resistant vinyl sticker. Perfect for laptops, water bottles, and cars.' },
+                ];
+                this.state.products = initialProducts;
+                this.saveProductsToStorage();
+            },
+
+            addToCart(productId, quantity = 1) {
+                const product = this.state.products.find(p => p.id === productId);
+                const cartItem = this.state.cart.find(item => item.id === productId);
+                if (cartItem) cartItem.quantity += quantity;
+                else this.state.cart.push({ ...product, quantity });
+                this.updateCartCount();
+                this.saveCartToStorage();
+                this.showToast(`${product.name} added to cart!`);
+            },
+             updateCartQuantity(productId, change) {
+                const cartItem = this.state.cart.find(item => item.id === productId);
+                if (cartItem) {
+                    cartItem.quantity += change;
+                    if (cartItem.quantity <= 0) this.state.cart = this.state.cart.filter(item => item.id !== productId);
+                }
+                this.updateCartCount(); this.saveCartToStorage(); this.renderView();
+            },
+            updateCartCount() {
+                const el = document.getElementById('cart-count');
+                const total = this.state.cart.reduce((s, i) => s + i.quantity, 0);
+                el.textContent = total; el.classList.toggle('hidden', total === 0);
+            },
+            clearCart() { this.state.cart = []; this.saveCartToStorage(); this.updateCartCount(); },
+            
+            saveCartToStorage() { localStorage.setItem('nexaaracart', JSON.stringify(this.state.cart)); },
+            loadCartFromStorage() { this.state.cart = JSON.parse(localStorage.getItem('nexaaracart') || '[]'); },
+            saveProductsToStorage() { localStorage.setItem('nexaaraproducts', JSON.stringify(this.state.products)); },
+            loadProductsFromStorage() { this.state.products = JSON.parse(localStorage.getItem('nexaaraproducts') || '[]'); },
+            saveOrdersToStorage() { localStorage.setItem('nexaaraorders', JSON.stringify(this.state.orders)); },
+            loadOrdersFromStorage() { this.state.orders = JSON.parse(localStorage.getItem('nexaaraorders') || '[]'); },
+
+            navigateTo(page, params = null) {
+                this.state.currentPage = page;
+                if (page === 'product') this.state.currentProduct = this.state.products.find(p => p.id === params);
+                if (page === 'shop' && params) {
+                    this.state.shopFilters.searchQuery = params.searchQuery ?? this.state.shopFilters.searchQuery;
+                    document.getElementById('search-bar').value = this.state.shopFilters.searchQuery;
+                }
+                document.querySelectorAll('#main-content > div').forEach(v => v.classList.add('hidden'));
+                const view = document.getElementById(`${page}-view`);
+                if (view) view.classList.remove('hidden');
+                this.renderView(); window.scrollTo(0, 0); 
+            },
+
+            renderView() {
+                const renderers = {
+                    'home': this.renderHomeView, 'shop': this.renderShopView,
+                    'product': this.renderProductDetailView, 'cart': this.renderCartView,
+                    'checkout': this.renderCheckoutView, 
+                    'confirmation': this.renderConfirmationView, 'account': this.renderAccountView,
+                    'admin': this.renderAdminView
+                };
+                const func = renderers[this.state.currentPage];
+                if (func) func.call(this, this.state.currentProduct);
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            },
+
+            renderHomeView() {
+                document.getElementById('home-view').innerHTML = `
+                    <section class="bg-white rounded-lg shadow-sm overflow-hidden mb-12">
+                         <div class="relative">
+                            <img class="w-full h-64 md:h-[500px] object-cover" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop" alt="Fashion Sale Banner">
+                            <div class="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center text-center p-4">
+                                <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight">Style Meets Quality</h1>
+                                <p class="mt-2 md:mt-4 text-lg md:text-xl text-white max-w-2xl">Discover our new collection. Premium products designed for the modern lifestyle.</p>
+                                <button onclick="app.navigateTo('shop')" class="mt-8 px-10 py-4 bg-orange-600 text-white font-semibold rounded-full hover:bg-orange-700 transition-transform hover:scale-105 duration-300">Shop The Collection</button>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="mb-12">
+                        <h2 class="text-3xl font-bold text-center tracking-tight text-gray-900 mb-8">Featured Products</h2>
+                        <div class="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-4 xl:gap-x-8">
+                            ${this.state.products.slice(0, 4).map(p => this.renderProductCard(p)).join('')}
+                        </div>
+                    </section>
+                `;
+            },
+            
+            renderShopView() {
+                 let filteredProducts = [...this.state.products];
+                if (this.state.shopFilters.searchQuery) filteredProducts = filteredProducts.filter(p => p.name.toLowerCase().includes(this.state.shopFilters.searchQuery.toLowerCase()));
+                if (this.state.shopFilters.category !== 'All') filteredProducts = filteredProducts.filter(p => p.category === this.state.shopFilters.category);
+                if (this.state.shopFilters.sortBy === 'price-asc') filteredProducts.sort((a, b) => a.price - b.price);
+                if (this.state.shopFilters.sortBy === 'price-desc') filteredProducts.sort((a, b) => b.price - a.price);
+                const categories = ['All', ...new Set(this.state.products.map(p => p.category))];
+                document.getElementById('shop-view').innerHTML = `<h1 class="text-4xl font-extrabold tracking-tight text-gray-900 mb-8">Our Collection</h1><div class="flex flex-col md:flex-row gap-8"><aside class="w-full md:w-1/4"><h2 class="text-lg font-semibold mb-4">Filters</h2><div class="space-y-4"><div><label class="font-medium">Category</label><div class="mt-2 space-y-1">${categories.map(cat => `<button onclick="app.updateFilters({ category: '${cat}' })" class="w-full text-left p-2 rounded ${this.state.shopFilters.category === cat ? 'bg-orange-100 text-orange-700' : 'hover:bg-gray-100'}">${cat}</button>`).join('')}</div></div><div><label for="sort-by" class="font-medium">Sort By</label><select id="sort-by" onchange="app.updateFilters({ sortBy: this.value })" class="w-full mt-2 p-2 border rounded-md"><option value="default">Default</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option></select></div></div></aside><main class="w-full md:w-3/4"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">${filteredProducts.length > 0 ? filteredProducts.map(p => this.renderProductCard(p)).join('') : '<p class="col-span-full">No products found.</p>'}</div></main></div>`;
+                document.getElementById('sort-by').value = this.state.shopFilters.sortBy;
+            },
+            
+            updateFilters(newFilters) { this.state.shopFilters = { ...this.state.shopFilters, ...newFilters }; this.renderShopView(); },
+            
+            renderProductCard(product) {
+                 return `<div class="group bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col"><div class="relative"><img onclick="app.navigateTo('product', ${product.id})" src="${product.image}" alt="${product.name}" class="w-full h-64 object-cover cursor-pointer"><div class="absolute top-2 right-2 bg-white/80 p-1 rounded-full text-xs font-bold text-orange-600 uppercase">${product.category}</div></div><div class="p-4 flex flex-col flex-grow"><h3 class="text-md font-semibold text-gray-800 flex-grow"><a href="#" onclick="event.preventDefault(); app.navigateTo('product', ${product.id})">${product.name}</a></h3><div class="flex justify-between items-center mt-4"><p class="text-lg font-bold text-gray-900">$${product.price.toFixed(2)}</p><button onclick="app.addToCart(${product.id})" class="p-2 bg-gray-100 rounded-full hover:bg-orange-500 hover:text-white transition-colors"><i data-lucide="shopping-cart"></i></button></div></div></div>`;
+            },
+
+            renderProductDetailView(product) {
+                 if (!product) { return; }
+                 const relatedProducts = this.state.products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+                 document.getElementById('product-detail-view').innerHTML = `<div class="bg-white p-6 md:p-8 rounded-lg shadow-lg"><button onclick="app.navigateTo('shop')" class="mb-6 text-sm font-medium text-orange-600 hover:text-orange-800 flex items-center gap-2"><i data-lucide="arrow-left" class="h-4 w-4"></i> Back to Shop</button><div class="grid md:grid-cols-2 gap-8 lg:gap-12"><div><img src="${product.image}" alt="${product.name}" class="w-full rounded-lg shadow-md"></div><div><h1 class="text-4xl font-extrabold tracking-tight text-gray-900">${product.name}</h1><p class="text-3xl mt-4 text-gray-900 font-bold">$${product.price.toFixed(2)}</p><div class="mt-6"><p class="text-base text-gray-700">${product.description}</p></div><div class="mt-10 flex items-center gap-4"><div class="flex items-center border rounded-md"><button onclick="this.nextElementSibling.stepDown()" class="px-3 py-2 text-lg font-bold">-</button><input id="quantity-input" type="number" value="1" min="1" class="w-16 text-center border-l border-r focus:outline-none"><button onclick="this.previousElementSibling.stepUp()" class="px-3 py-2 text-lg font-bold">+</button></div><button onclick="app.addToCart(${product.id}, parseInt(document.getElementById('quantity-input').value))" class="flex-1 bg-orange-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-orange-700">Add to cart</button></div></div></div></div>${relatedProducts.length > 0 ? `<div class="mt-16"><h2 class="text-2xl font-bold tracking-tight text-gray-900">You Might Also Like</h2><div class="mt-6 grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-4 xl:gap-x-8">${relatedProducts.map(p => this.renderProductCard(p)).join('')}</div></div>` : ''}`;
+            },
+
+            renderCartView() {
+                 if (this.state.cart.length === 0) { document.getElementById('cart-view').innerHTML = `<div class="bg-white p-8 rounded-lg shadow-sm text-center"><h2 class="text-2xl font-bold mb-4">Your Cart is Empty</h2><button onclick="app.navigateTo('shop')" class="px-6 py-2 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700">Start Shopping</button></div>`; return; }
+                const subtotal = this.state.cart.reduce((s, i) => s + i.price * i.quantity, 0);
+                 document.getElementById('cart-view').innerHTML = `<div class="bg-white p-8 rounded-lg shadow-sm"><h2 class="text-2xl font-bold text-gray-900 mb-6">Shopping Cart</h2><ul role="list" class="divide-y divide-gray-200">${this.state.cart.map(item => `<li class="flex py-6"><div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border"><img src="${item.image}" alt="${item.name}" class="h-full w-full object-cover"></div><div class="ml-4 flex flex-1 flex-col"><div><div class="flex justify-between text-base font-medium text-gray-900"><h3>${item.name}</h3><p class="ml-4">$${(item.price * item.quantity).toFixed(2)}</p></div></div><div class="flex flex-1 items-end justify-between text-sm"><div class="flex items-center border rounded"><button onclick="app.updateCartQuantity(${item.id}, -1)" class="px-2 py-1">-</button><p class="px-3">${item.quantity}</p><button onclick="app.updateCartQuantity(${item.id}, 1)" class="px-2 py-1">+</button></div><div class="flex"><button onclick="app.updateCartQuantity(${item.id}, -item.quantity)" type="button" class="font-medium text-orange-600 hover:text-orange-500">Remove</button></div></div></div></li>`).join('')}</ul><div class="border-t py-6 mt-6"><div class="flex justify-between text-base font-medium text-gray-900"><p>Subtotal</p><p>$${subtotal.toFixed(2)}</p></div><p class="mt-0.5 text-sm text-gray-500">Shipping calculated at checkout.</p><div class="mt-6"><button onclick="app.navigateTo('checkout')" class="w-full flex items-center justify-center rounded-md border bg-orange-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-orange-700">Checkout</button></div></div></div>`;
+            },
+            
+            renderCheckoutView() {
+                const subtotal = this.state.cart.reduce((s, i) => s + i.price * i.quantity, 0);
+                const total = subtotal + 5.00; // $5 shipping
+                document.getElementById('checkout-view').innerHTML = `
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <div class="bg-white p-8 rounded-lg shadow-sm">
+                            <h2 class="text-xl font-bold mb-6">Shipping Information</h2>
+                            <form id="checkout-form" class="space-y-4">
+                                <div><label class="block text-sm font-medium">Full Name</label><input type="text" id="name" name="name" required class="mt-1 block w-full p-2 border rounded-md"></div>
+                                <div><label class="block text-sm font-medium">Email Address</label><input type="email" id="email" name="email" required class="mt-1 block w-full p-2 border rounded-md"></div>
+                                <div><label class="block text-sm font-medium">Mobile Number</label><input type="tel" id="mobile" name="mobile" required class="mt-1 block w-full p-2 border rounded-md"></div>
+                                <div><label class="block text-sm font-medium">Address</label><input type="text" id="address" name="address" required class="mt-1 block w-full p-2 border rounded-md"></div>
+                                <button type="button" onclick="app.handleCheckoutSubmit()" class="w-full bg-orange-600 text-white font-semibold py-3 rounded-md hover:bg-orange-700 mt-6">Place Order</button>
+                            </form>
+                        </div>
+                        <div class="bg-white p-8 rounded-lg shadow-sm h-fit">
+                            <h2 class="text-xl font-bold mb-6">Order Summary</h2>
+                            <ul class="divide-y">${this.state.cart.map(i => `<li class="flex justify-between py-2"><span>${i.name} x ${i.quantity}</span><span>$${(i.price * i.quantity).toFixed(2)}</span></li>`).join('')}</ul>
+                            <div class="mt-6 border-t pt-6 space-y-2">
+                                <div class="flex justify-between"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
+                                <div class="flex justify-between"><span>Shipping</span><span>$5.00</span></div>
+                                <div class="flex justify-between text-lg font-bold"><span>Total</span><span>$${total.toFixed(2)}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            handleCheckoutSubmit() {
+                const form = document.getElementById('checkout-form');
+                if (form.checkValidity()) {
+                    const formData = new FormData(form);
+                    const customerInfo = Object.fromEntries(formData.entries());
+                    const newOrder = {
+                        id: `NXR-${Date.now()}`,
+                        date: new Date().toLocaleDateString(),
+                        customer: customerInfo,
+                        items: [...this.state.cart],
+                        total: this.state.cart.reduce((s, i) => s + i.price * i.quantity, 0) + 5.00,
+                        status: 'Processing'
+                    };
+                    this.state.orders.unshift(newOrder);
+                    this.saveOrdersToStorage();
+                    this.clearCart();
+                    this.navigateTo('confirmation');
+                } else {
+                    form.reportValidity();
+                }
+            },
+             renderConfirmationView() {
+                const order = this.state.orders[0];
+                document.getElementById('confirmation-view').innerHTML = `<div class="bg-white p-8 rounded-lg shadow-sm text-center max-w-lg mx-auto"><div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4"><i data-lucide="check" class="h-6 w-6 text-green-600"></i></div><h2 class="text-2xl font-bold">Thank you for your order!</h2><p class="mt-2">Your order <span class="font-mono font-bold">${order.id}</span> has been placed.</p><div class="mt-8"><button onclick="app.navigateTo('shop')" class="px-8 py-3 bg-orange-600 text-white font-semibold rounded-md hover:bg-orange-700">Continue Shopping</button></div></div>`;
+            },
+
+            renderAccountView() {
+                 document.getElementById('account-view').innerHTML = `<div class="bg-white p-8 rounded-lg shadow-sm"><h2 class="text-3xl font-bold mb-8">My Account</h2><div class="grid md:grid-cols-3 gap-8"><div class="md:col-span-1"><h3 class="text-lg font-semibold border-b pb-2">Profile Details</h3><div class="mt-4 space-y-2"><p><strong>Name:</strong> Jane Doe (Demo)</p><p><strong>Email:</strong> jane.doe@example.com</p></div></div><div class="md:col-span-2"><h3 class="text-lg font-semibold border-b pb-2">My Orders</h3><div class="mt-4 space-y-4">${this.state.orders.length > 0 ? this.state.orders.map(o => `<div class="border rounded-lg p-4 flex justify-between items-center"><div><p class="font-bold">${o.id}</p><p class="text-sm text-gray-500">Date: ${o.date} | Status: <span class="font-medium text-orange-600">${o.status}</span></p></div><p class="font-bold text-lg">$${o.total.toFixed(2)}</p></div>`).join('') : '<p>You have no orders.</p>'}</div></div></div></div>`;
+            },
+            
+            renderAdminView() {
+                const ordersHTML = this.state.orders.map(o => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 border-b">${o.id}</td>
+                        <td class="p-3 border-b">
+                            <div>${o.customer.name}</div>
+                            <div class="text-xs text-gray-500">${o.customer.email} | ${o.customer.mobile}</div>
+                            <div class="text-xs text-gray-500">${o.customer.address}</div>
+                        </td>
+                        <td class="p-3 border-b">$${o.total.toFixed(2)}</td>
+                        <td class="p-3 border-b">${o.status}</td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('admin-view').innerHTML = `
+                    <div class="bg-white p-8 rounded-lg shadow-sm">
+                        <h2 class="text-3xl font-bold mb-8">Admin Dashboard</h2>
+                        <!-- Product Management -->
+                        <div class="mb-12">
+                            <h3 class="text-xl font-semibold mb-4">Product Management</h3>
+                            <div id="product-form-container" class="mb-6 bg-gray-50 p-6 rounded-lg border">${this.getProductFormHTML()}</div>
+                            <div class="overflow-x-auto"><table class="w-full text-left text-sm">
+                                <thead><tr class="bg-gray-100">
+                                    <th class="p-3">Name</th><th class="p-3">Price</th><th class="p-3">Category</th><th class="p-3">Actions</th>
+                                </tr></thead>
+                                <tbody>${this.state.products.map(p => `<tr><td class="p-3 border-b">${p.name}</td><td class="p-3 border-b">$${p.price.toFixed(2)}</td><td class="p-3 border-b">${p.category}</td><td class="p-3 border-b"><button onclick="app.editProductForm(${p.id})" class="text-blue-500">Edit</button> | <button onclick="app.deleteProduct(${p.id})" class="text-red-500">Delete</button></td></tr>`).join('')}</tbody>
+                            </table></div>
+                        </div>
+                        <!-- Order Management -->
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4">Customer Orders</h3>
+                             <div class="overflow-x-auto"><table class="w-full text-left text-sm">
+                                <thead><tr class="bg-gray-100">
+                                    <th class="p-3">Order ID</th><th class="p-3">Customer Info</th><th class="p-3">Total</th><th class="p-3">Status</th>
+                                </tr></thead>
+                                <tbody>${ordersHTML || '<tr><td colspan="4" class="p-4 text-center">No orders yet.</td></tr>'}</tbody>
+                            </table></div>
+                        </div>
+                    </div>
+                `;
+            },
+            
+            getProductFormHTML(product = null) {
+                 const isEditing = product !== null; return `<h4 class="text-lg font-medium mb-2">${isEditing ? 'Edit Product' : 'Add New Product'}</h4><form id="admin-product-form" class="grid grid-cols-1 md:grid-cols-2 gap-4"><input type="hidden" name="id" value="${product?.id || ''}"><div><label class="block text-sm">Name</label><input type="text" name="name" value="${product?.name || ''}" required class="w-full p-2 border rounded"></div><div><label class="block text-sm">Price</label><input type="number" name="price" step="0.01" value="${product?.price || ''}" required class="w-full p-2 border rounded"></div><div><label class="block text-sm">Category</label><input type="text" name="category" value="${product?.category || ''}" required class="w-full p-2 border rounded"></div><div><label class="block text-sm">Image URL</label><input type="text" name="image" value="${product?.image || ''}" required class="w-full p-2 border rounded"></div><div class="md:col-span-2"><label class="block text-sm">Description</label><textarea name="description" class="w-full p-2 border rounded">${product?.description || ''}</textarea></div><div class="md:col-span-2 flex gap-4"><button type="button" onclick="app.handleProductSubmit()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">${isEditing ? 'Update Product' : 'Add Product'}</button>${isEditing ? '<button type="button" onclick="app.cancelEditProduct()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Cancel</button>' : ''}</div></form>`;
+            },
+
+            handleProductSubmit() {
+                const form = document.getElementById('admin-product-form');
+                const data = Object.fromEntries(new FormData(form).entries());
+                if (this.state.editingProductId) {
+                    const product = this.state.products.find(p => p.id === this.state.editingProductId);
+                    Object.assign(product, data, { price: parseFloat(data.price) });
+                } else {
+                    this.state.products.push({ ...data, id: Date.now(), price: parseFloat(data.price) });
+                }
+                this.saveProductsToStorage();
+                this.state.editingProductId = null; this.renderView();
+            },
+
+            editProductForm(productId) {
+                const product = this.state.products.find(p => p.id === productId);
+                this.state.editingProductId = productId;
+                document.getElementById('product-form-container').innerHTML = this.getProductFormHTML(product);
+            },
+
+            cancelEditProduct() {
+                this.state.editingProductId = null;
+                document.getElementById('product-form-container').innerHTML = this.getProductFormHTML();
+            },
+
+            deleteProduct(productId) {
+                if(confirm('Are you sure you want to delete this product?')) {
+                    this.state.products = this.state.products.filter(p => p.id !== productId);
+                    this.saveProductsToStorage(); this.renderView();
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+             // A short delay to ensure lucide is loaded
+            setTimeout(() => {
+                app.init();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
+
 
