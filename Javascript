@@ -1,0 +1,381 @@
+/* NEXAARA Store — Frontend SPA using LocalStorage */
+
+// Seed products
+const seedProducts = [
+  { id: 1, name: "NEXAARA Classic Black T‑Shirt", price: 499, category: "T-Shirts",
+    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",
+    description: "Premium cotton टी‑शर्ट, soft feel और durable print." },
+  { id: 2, name: "NEXAARA Premium Hoodie", price: 1299, category: "Hoodies",
+    image: "https://images.unsplash.com/photo-1556821840-3a9c6c1a0e8f?w=800",
+    description: "Warm fleece lining के साथ आरामदायक premium hoodie." },
+  { id: 3, name: "NEXAARA White T‑Shirt", price: 449, category: "T-Shirts",
+    image: "https://images.unsplash.com/photo-1527719327859-c6ce80353573?w=800",
+    description: "Minimal look, breathable fabric, everyday wear." },
+  { id: 4, name: "NEXAARA Coffee Mug", price: 299, category: "Accessories",
+    image: "https://images.unsplash.com/photo-1514228742587-6b1558fcf93a?w=800",
+    description: "Ceramic mug with NEXAARA branding, 330ml." },
+  { id: 5, name: "NEXAARA Phone Case", price: 399, category: "Accessories",
+    image: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=800",
+    description: "Durable finish, precise cutouts, matte grip." },
+  { id: 6, name: "NEXAARA Gray Hoodie", price: 1199, category: "Hoodies",
+    image: "https://images.unsplash.com/photo-1556821840-3a9c6c1a0e8f?w=800",
+    description: "Daily comfort hoodie with soft fabric." },
+  { id: 7, name: "NEXAARA Logo Tee Orange", price: 549, category: "T-Shirts",
+    image: "https://images.unsplash.com/photo-1503342217505-b0a15cf70489?w=800",
+    description: "Vibrant logo print with shoulder-to-shoulder taping." },
+  { id: 8, name: "NEXAARA Tote Bag", price: 349, category: "Accessories",
+    image: "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=800",
+    description: "Eco friendly canvas tote for daily use." },
+];
+
+const ADMIN = { email: "admin@nexaara.com", password: "admin123" };
+
+const ls = {
+  get: (k, d) => JSON.parse(localStorage.getItem(k) || JSON.stringify(d)),
+  set: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+};
+
+function initStore(){
+  if(!localStorage.getItem("nx_products")) ls.set("nx_products", seedProducts);
+  if(!localStorage.getItem("nx_orders")) ls.set("nx_orders", []);
+  if(!localStorage.getItem("nx_customers")) ls.set("nx_customers", []);
+  if(!localStorage.getItem("nx_cart")) ls.set("nx_cart", []);
+}
+initStore();
+
+const q = s => document.querySelector(s);
+const qa = s => [...document.querySelectorAll(s)];
+const state = { view:"home", user:null, admin:false, product:null, filter:null };
+
+// Router
+function show(view){
+  qa(".view").forEach(v=>v.classList.remove("active"));
+  q(`#${view}View`).classList.add("active");
+  state.view = view;
+}
+function toast(msg){ alert(msg); }
+
+// Render chips
+function renderChips(){
+  const cats = ["All","T-Shirts","Hoodies","Accessories"];
+  const wrap = q("#catChips"); wrap.innerHTML="";
+  cats.forEach(c=>{
+    const b = document.createElement("button");
+    b.className = "chip"+(state.filter===c?" active":"");
+    b.textContent = c;
+    b.onclick = ()=>{ state.filter = c==="All"?null:c; renderProducts(); };
+    wrap.appendChild(b);
+  });
+}
+
+// Render product list
+function getProducts(){ return ls.get("nx_products", []); }
+function renderProducts(){
+  renderChips();
+  const grid = q("#productGrid");
+  let list = getProducts();
+  const term = q("#searchInput").value.trim().toLowerCase();
+  if(state.filter) list = list.filter(p=>p.category===state.filter);
+  if(term) list = list.filter(p=>p.name.toLowerCase().includes(term));
+  grid.innerHTML = list.map(p => `
+    <div class="card">
+      <img src="${p.image}" alt="${p.name}"/>
+      <h4>${p.name}</h4>
+      <div class="muted">${p.category}</div>
+      <div class="card__foot">
+        <div class="price">₹${p.price}</div>
+        <div>
+          <button class="btn btn--lite" data-id="${p.id}" data-act="view">View</button>
+          <button class="btn" data-id="${p.id}" data-act="add">Add</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+  grid.querySelectorAll("button").forEach(b=>{
+    b.onclick = e=>{
+      const id = +b.dataset.id;
+      if(b.dataset.act==="add") addToCart(id);
+      else openDetail(id);
+    };
+  });
+}
+
+// Product detail
+function openDetail(id){
+  const p = getProducts().find(x=>x.id===id);
+  state.product = p;
+  const el = q("#productDetail");
+  el.innerHTML = `
+    <img src="${p.image}" alt="${p.name}"/>
+    <div>
+      <h2>${p.name}</h2>
+      <div class="badge">${p.category}</div>
+      <p class="muted">${p.description}</p>
+      <h3>₹${p.price}</h3>
+      <div class="buy">
+        <button class="btn" id="detailAdd">Add to Cart</button>
+      </div>
+    </div>
+  `;
+  q("#detailAdd").onclick = ()=> addToCart(p.id);
+  show("product");
+}
+q("#backToHome").onclick = ()=> show("home");
+
+// Cart
+function getCart(){ return ls.get("nx_cart", []); }
+function setCart(v){ ls.set("nx_cart", v); updateCartBadge(); }
+function updateCartBadge(){ q("#cartCount").textContent = getCart().reduce((a,c)=>a+c.qty,0); }
+function addToCart(id){
+  const cart = getCart();
+  const idx = cart.findIndex(i=>i.id===id);
+  if(idx>-1) cart[idx].qty++;
+  else cart.push({ id, qty:1 });
+  setCart(cart);
+  toast("Added to cart");
+}
+function renderCart(){
+  const list = getCart();
+  const products = getProducts();
+  const wrap = q("#cartList");
+  if(!list.length){ wrap.innerHTML = "<p class='muted'>Cart is empty.</p>"; }
+  else{
+    wrap.innerHTML = list.map(it=>{
+      const p = products.find(x=>x.id===it.id);
+      return `
+        <div class="item">
+          <img src="${p.image}"/>
+          <div>
+            <div>${p.name}</div>
+            <div class="muted">₹${p.price} × ${it.qty}</div>
+          </div>
+          <div class="qty" data-id="${p.id}">
+            <button data-op="-">−</button>
+            <span>${it.qty}</span>
+            <button data-op="+">+</button>
+          </div>
+          <div>
+            <div>₹${p.price*it.qty}</div>
+            <button class="link" data-remove="${p.id}">Remove</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+    wrap.querySelectorAll("[data-op]").forEach(b=>{
+      b.onclick = ()=>{
+        const id = +b.parentElement.dataset.id;
+        const op = b.dataset.op;
+        const cart = getCart();
+        const i = cart.findIndex(x=>x.id===id);
+        if(i>-1){
+          cart[i].qty += (op==="+"?1:-1);
+          if(cart[i].qty<=0) cart.splice(i,1);
+          setCart(cart); renderCart();
+        }
+      };
+    });
+    wrap.querySelectorAll("[data-remove]").forEach(b=>{
+      b.onclick = ()=>{ setCart(getCart().filter(x=>x.id!==+b.dataset.remove)); renderCart(); };
+    });
+  }
+  const total = list.reduce((sum, it)=>{
+    const p = products.find(x=>x.id===it.id); return sum + p.price*it.qty;
+  },0);
+  q("#cartItemsCount").textContent = list.reduce((a,c)=>a+c.qty,0);
+  q("#cartTotal").textContent = total;
+  q("#payableAmount").textContent = total;
+}
+q("#continueShopping").onclick = ()=> show("home");
+
+// Checkout navigation
+q("#goToCustomer").onclick = ()=>{
+  if(getCart().length===0){ toast("Cart खाली है"); return; }
+  show("customer");
+};
+q("#backToCart").onclick = ()=> show("cart");
+q("#backToCustomer").onclick = ()=> show("customer");
+
+// Customer info
+q("#customerForm").onsubmit = e=>{
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  ls.set("nx_checkout_customer", data);
+  show("payment");
+};
+
+// Payment (simulate UPI)
+q("#upiForm").onsubmit = e=>{
+  e.preventDefault();
+  const { vpa, note } = Object.fromEntries(new FormData(e.target).entries());
+  if(!vpa.includes("@")){ toast("Valid UPI ID दर्ज करें"); return; }
+  // create order
+  const products = getProducts();
+  const cart = getCart();
+  const items = cart.map(it=>{
+    const p = products.find(x=>x.id===it.id);
+    return { id:p.id, name:p.name, price:p.price, qty:it.qty };
+  });
+  const amount = items.reduce((s,i)=>s+i.price*i.qty,0);
+  const order = {
+    id: "NX"+Date.now(),
+    items, amount,
+    customer: ls.get("nx_checkout_customer", {}),
+    vpa, note, status:"paid",
+    at: new Date().toISOString()
+  };
+  const orders = ls.get("nx_orders", []); orders.unshift(order); ls.set("nx_orders", orders);
+  setCart([]); // clear
+  q("#orderId").textContent = order.id;
+  show("success");
+};
+
+// Login / Signup (simple local)
+const loginDialog = q("#loginDialog");
+q("#loginOpenBtn").onclick = ()=> loginDialog.showModal();
+q("#logoutBtn").onclick = ()=>{
+  state.user=null; state.admin=false;
+  q("#logoutBtn").classList.add("hidden");
+  q("#loginOpenBtn").classList.remove("hidden");
+  toast("Logged out");
+};
+q("#loginForm").onsubmit = e=>{
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  let users = ls.get("nx_customers", []);
+  let user = users.find(u=>u.email===data.email);
+  if(!user){
+    user = { id: Date.now(), ...data };
+    users.push(user); ls.set("nx_customers", users);
+  }
+  state.user = user;
+  q("#loginOpenBtn").classList.add("hidden");
+  q("#logoutBtn").classList.remove("hidden");
+  loginDialog.close();
+  toast("Welcome, "+user.name);
+};
+
+// Admin
+q("#adminPanelBtn").onclick = ()=> show("adminLogin");
+q("#adminLoginForm").onsubmit = e=>{
+  e.preventDefault();
+  const { email, password } = Object.fromEntries(new FormData(e.target).entries());
+  if(email===ADMIN.email && password===ADMIN.password){
+    state.admin = true; renderAdmin(); show("admin");
+  } else toast("Invalid admin credentials");
+};
+q("#adminLogout").onclick = ()=>{ state.admin=false; show("home"); };
+
+// Admin: render sections
+function renderAdmin(){
+  // products
+  const products = getProducts();
+  const elP = q("#adminProducts");
+  elP.innerHTML = products.map(p=>`
+    <div class="row">
+      <img src="${p.image}"/>
+      <div>
+        <div>${p.name}</div>
+        <div class="muted">${p.category}</div>
+      </div>
+      <div>₹${p.price}</div>
+      <div>
+        <button class="btn btn--lite" data-edit="${p.id}">Edit</button>
+        <button class="link" data-del="${p.id}" style="color:#fca5a5">Delete</button>
+      </div>
+    </div>
+  `).join("");
+  elP.querySelectorAll("[data-del]").forEach(b=>{
+    b.onclick = ()=> {
+      const list = getProducts().filter(x=>x.id!==+b.dataset.del);
+      ls.set("nx_products", list); renderAdmin(); renderProducts();
+    };
+  });
+  elP.querySelectorAll("[data-edit]").forEach(b=>{
+    b.onclick = ()=> openProductForm(+b.dataset.edit);
+  });
+
+  // orders
+  const orders = ls.get("nx_orders", []);
+  const elO = q("#adminOrders");
+  elO.innerHTML = orders.map(o=>`
+    <div class="row">
+      <div class="badge">${o.items.length} items</div>
+      <div>
+        <div>#${o.id}</div>
+        <div class="muted">${new Date(o.at).toLocaleString()}</div>
+      </div>
+      <div>₹${o.amount}</div>
+      <div><span class="badge">paid</span></div>
+    </div>
+  `).join("") || "<p class='muted'>No orders yet.</p>";
+
+  // customers
+  const customers = ls.get("nx_customers", []);
+  const elC = q("#adminCustomers");
+  elC.innerHTML = customers.map(c=>`
+    <div class="row">
+      <div class="badge">${c.name[0]?.toUpperCase() || "U"}</div>
+      <div>
+        <div>${c.name}</div>
+        <div class="muted">${c.email} — ${c.mobile}</div>
+      </div>
+      <div></div>
+      <div></div>
+    </div>
+  `).join("") || "<p class='muted'>No customers yet.</p>";
+}
+
+// Product add/edit dialog
+const productDialog = q("#productModal");
+q("#addProductBtn").onclick = ()=> openProductForm();
+
+function openProductForm(id){
+  const form = q("#productForm");
+  form.reset();
+  if(id){
+    const p = getProducts().find(x=>x.id===id);
+    form.name.value = p.name;
+    form.price.value = p.price;
+    form.category.value = p.category;
+    form.image.value = p.image;
+    form.description.value = p.description;
+    form.id.value = p.id;
+    q("#productFormTitle").textContent = "Edit Product";
+  }else{
+    q("#productFormTitle").textContent = "Add Product";
+  }
+  productDialog.showModal();
+}
+q("#productForm").onsubmit = e=>{
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target).entries());
+  const products = getProducts();
+  if(data.id){ // edit
+    const id = +data.id;
+    const i = products.findIndex(x=>x.id===id);
+    products[i] = { id, name:data.name, price:+data.price, category:data.category, image:data.image, description:data.description };
+  }else{ // add
+    const id = Math.max(0,...products.map(x=>x.id))+1;
+    products.push({ id, name:data.name, price:+data.price, category:data.category, image:data.image, description:data.description });
+  }
+  ls.set("nx_products", products);
+  productDialog.close();
+  renderAdmin(); renderProducts();
+};
+
+// Search & actions
+q("#searchBtn").onclick = renderProducts;
+q("#shopNowBtn").onclick = ()=> { state.filter=null; q("#searchInput").value=""; renderProducts(); }
+q(".brand").onclick = ()=> show("home");
+q("#cartOpenBtn").onclick = ()=> { renderCart(); show("cart"); };
+q("#goToCustomer").onclick = ()=> { if(getCart().length){ show("customer"); } };
+
+q("#goHomeAfterOrder").onclick = ()=> show("home");
+
+// Footer year
+q("#year").textContent = new Date().getFullYear();
+
+// Initial
+renderProducts();
+updateCartBadge();
+show("home");
