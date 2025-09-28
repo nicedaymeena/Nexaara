@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<!-- saved from url=(0152)https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html -->
+<html lang="en" class="translated-ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXAARA - Professional Online Shopping</title>
+    <link rel="stylesheet" href="./NEXAARA - Professional Online Shopping_files/style.css">
+<link type="text/css" rel="stylesheet" charset="UTF-8" href="./NEXAARA - Professional Online Shopping_files/m=el_main_css"></head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">NEXAARA</font></font></h2>
+            </div>
+            <div class="nav-search">
+                <input type="text" id="searchInput" placeholder="Search for products...">
+                <button id="searchBtn"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🔍</font></font></button>
+            </div>
+            <div class="nav-actions">
+                <button id="loginBtn" class="btn btn--outline"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Login</font></font></button>
+                <button id="cartBtn" class="btn btn--primary"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">cart (</font></font><span id="cartCount"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">0</font></font></span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">,</font></font></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="mainContent">
+        
+        <!-- Homepage -->
+        <div id="homepage" class="page active">
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="hero-content">
+                    <h1><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Welcome to NEXAARA</font></font></h1>
+                    <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Premium quality products at the best prices</font></font></p>
+                    <button class="btn btn--primary btn--lg" id="shopNowBtn"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Shop Now</font></font></button>
+                </div>
+            </section>
+
+            <!-- Categories Section -->
+            <section class="categories">
+                <div class="container">
+                    <h2><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Categories</font></font></h2>
+                    <div class="category-grid">
+                        <div class="category-card" data-category="T-Shirts">
+                            <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">T-shirt</font></font></h3>
+                            <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Premium Cotton T-Shirt</font></font></p>
+                        </div>
+                        <div class="category-card" data-category="Hoodies">
+                            <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Hoodie</font></font></h3>
+                            <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Comfortable Hoodie Collection</font></font></p>
+                        </div>
+                        <div class="category-card" data-category="Accessories">
+                            <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">accessories</font></font></h3>
+                            <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Stylish accessories</font></font></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Products -->
+            <section class="featured-products">
+                <div class="container">
+                    <h2><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Featured Products</font></font></h2>
+                    <div id="featuredProductsGrid" class="products-grid">
+            <div class="product-card" onclick="app.showProductDetail(1)">
+                <img src="./NEXAARA - Professional Online Shopping_files/photo-1521572163474-6864f9cf17ab" alt="NEXAARA Classic Black T-Shirt" class="product-image" loading="lazy">
+                <div class="product-info">
+                    <h3 class="product-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">NEXAARA Classic Black T-Shirt</font></font></h3>
+                    <p class="product-price"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">₹499</font></font></p>
+                    <p class="product-description"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Premium quality cotton t-shirt with NEXAARA logo</font></font></p>
+                    <button class="btn btn--primary" onclick="event.stopPropagation(); app.addToCart(1)"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+                        Add to Cart
+                    </font></font></button>
+                </div>
+            </div>
+        
+            <div class="product-card" onclick="app.showProductDetail(2)">
+                <img src="./NEXAARA - Professional Online Shopping_files/photo-1556821840-3a9c6c1a0e8f" alt="NEXAARA Premium Hoodie" class="product-image" loading="lazy">
+                <div class="product-info">
+                    <h3 class="product-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">NEXAARA Premium Hoodie</font></font></h3>
+                    <p class="product-price"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">₹1299</font></font></p>
+                    <p class="product-description"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Comfortable hoodie perfect for casual wear</font></font></p>
+                    <button class="btn btn--primary" onclick="event.stopPropagation(); app.addToCart(2)"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+                        Add to Cart
+                    </font></font></button>
+                </div>
+            </div>
+        
+            <div class="product-card" onclick="app.showProductDetail(3)">
+                <img src="./NEXAARA - Professional Online Shopping_files/photo-1527719327859-c6ce80353573" alt="NEXAARA White T-Shirt" class="product-image" loading="lazy">
+                <div class="product-info">
+                    <h3 class="product-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">NEXAARA White T-Shirt</font></font></h3>
+                    <p class="product-price"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">₹449</font></font></p>
+                    <p class="product-description"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Clean white cotton t-shirt with minimalist design</font></font></p>
+                    <button class="btn btn--primary" onclick="event.stopPropagation(); app.addToCart(3)"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+                        Add to Cart
+                    </font></font></button>
+                </div>
+            </div>
+        
+            <div class="product-card" onclick="app.showProductDetail(4)">
+                <img src="./NEXAARA - Professional Online Shopping_files/photo-1514228742587-6b1558fcf93a" alt="NEXAARA Coffee Mug" class="product-image" loading="lazy">
+                <div class="product-info">
+                    <h3 class="product-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">NEXAARA Coffee Mug</font></font></h3>
+                    <p class="product-price"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">₹299</font></font></p>
+                    <p class="product-description"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ceramic mug with NEXAARA branding</font></font></p>
+                    <button class="btn btn--primary" onclick="event.stopPropagation(); app.addToCart(4)"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+                        Add to Cart
+                    </font></font></button>
+                </div>
+            </div>
+        
+            <div class="product-card" onclick="app.showProductDetail(5)">
+                <img src="./NEXAARA - Professional Online Shopping_files/photo-1556656793-08538906a9f8" alt="NEXAARA Phone Case" class="product-image" loading="lazy">
+                <div class="product-info">
+                    <h3 class="product-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">NEXAARA Phone Case</font></font></h3>
+                    <p class="product-price"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">₹399</font></font></p>
+                    <p class="product-description"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Durable phone case with premium finish</font></font></p>
+                    <button class="btn btn--primary" onclick="event.stopPropagation(); app.addToCart(5)"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+                        Add to Cart
+                    </font></font></button>
+                </div>
+            </div>
+        
+            <div class="product-card" onclick="app.showProductDetail(6)">
+                <img src="./NEXAARA - Professional Online Shopping_files/photo-1556821840-3a9c6c1a0e8f" alt="NEXAARA Grey Hoodie" class="product-image" loading="lazy">
+                <div class="product-info">
+                    <h3 class="product-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">NEXAARA Grey Hoodie</font></font></h3>
+                    <p class="product-price"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">₹1199</font></font></p>
+                    <p class="product-description"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Stylish gray hoodie for everyday comfort</font></font></p>
+                    <button class="btn btn--primary" onclick="event.stopPropagation(); app.addToCart(6)"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+                        Add to Cart
+                    </font></font></button>
+                </div>
+            </div>
+        </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Products Page -->
+        <div id="productsPage" class="page">
+            <div class="container">
+                <div class="products-header">
+                    <h1><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">All products</font></font></h1>
+                    <div class="filters">
+                        <select id="categoryFilter">
+                            <option value=""><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">All categories</font></font></option>
+                            <option value="T-Shirts"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">T-shirt</font></font></option>
+                            <option value="Hoodies"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Hoodie</font></font></option>
+                            <option value="Accessories"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">accessories</font></font></option>
+                        </select>
+                        <select id="sortFilter">
+                            <option value="name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">By name</font></font></option>
+                            <option value="price-low"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">at a low price</font></font></option>
+                            <option value="price-high"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">at a higher price</font></font></option>
+                        </select>
+                    </div>
+                </div>
+                <div id="productsGrid" class="products-grid"></div>
+            </div>
+        </div>
+
+        <!-- Product Detail Page -->
+        <div id="productDetailPage" class="page">
+            <div class="container">
+                <div id="productDetail" class="product-detail"></div>
+            </div>
+        </div>
+
+        <!-- Login Page -->
+        <div id="loginPage" class="page">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <h2><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Login</font></font></h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Email</font></font></label>
+                            <input type="email" id="loginEmail" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Password</font></font></label>
+                            <input type="password" id="loginPassword" class="form-control" required="">
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--full-width"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Login</font></font></button>
+                    </form>
+                    <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Don't have an account? </font></font><a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#" id="showSignup"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Sign up</font></font></a></p>
+                    <p><a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#" id="adminLoginLink"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Admin Login</font></font></a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Page -->
+        <div id="signupPage" class="page">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <h2><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Create a new account</font></font></h2>
+                    <form id="signupForm">
+                        <div class="form-group">
+                            <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Full name</font></font></label>
+                            <input type="text" id="signupName" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Email</font></font></label>
+                            <input type="email" id="signupEmail" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">mobile number</font></font></label>
+                            <input type="tel" id="signupMobile" class="form-control" required="">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Password</font></font></label>
+                            <input type="password" id="signupPassword" class="form-control" required="">
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--full-width"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Sign up</font></font></button>
+                    </form>
+                    <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Already have an account? </font></font><a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#" id="showLogin"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Login</font></font></a></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Page -->
+        <div id="cartPage" class="page">
+            <div class="container">
+                <h1><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Shopping Cart</font></font></h1>
+                <div id="cartItems" class="cart-items"></div>
+                <div id="cartSummary" class="cart-summary">
+                    <div class="total">
+                        <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Total Amount: ₹ </font></font><span id="cartTotal"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">0</font></font></span></h3>
+                        <button id="checkoutBtn" class="btn btn--primary btn--lg"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Checkout</font></font></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout Page -->
+        <div id="checkoutPage" class="page">
+            <div class="container">
+                <h1><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Checkout</font></font></h1>
+                <div class="checkout-steps">
+                    <div id="customerInfoStep" class="checkout-step active">
+                        <h2><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Customer Information</font></font></h2>
+                        <form id="customerInfoForm">
+                            <div class="form-group">
+                                <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Full name</font></font></label>
+                                <input type="text" id="customerName" class="form-control" required="">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">mobile number</font></font></label>
+                                <input type="tel" id="customerMobile" class="form-control" required="">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Full address</font></font></label>
+                                <textarea id="customerAddress" class="form-control" rows="4" required=""></textarea>
+                            </div>
+                            <button type="submit" class="btn btn--primary"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Go to the payment page</font></font></button>
+                        </form>
+                    </div>
+                    
+                    <div id="paymentStep" class="checkout-step">
+                        <h2><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Payment</font></font></h2>
+                        <div class="payment-methods">
+                            <div class="payment-option selected">
+                                <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">UPI Payment</font></font></h3>
+                                <form id="upiForm">
+                                    <div class="form-group">
+                                        <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">UPI ID</font></font></label>
+                                        <input type="text" id="upiId" class="form-control" placeholder="yourname@paytm" required="">
+                                    </div>
+                                    <div class="order-summary">
+                                        <h4><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Order Summary</font></font></h4>
+                                        <div id="orderItems"></div>
+                                        <div class="total-amount">
+                                            <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Total Amount: ₹ </font></font><span id="finalAmount"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">0</font></font></span></strong>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn--primary btn--lg"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Make Payment</font></font></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Confirmation Page -->
+        <div id="confirmationPage" class="page">
+            <div class="container">
+                <div class="confirmation-message">
+                    <h1><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">✅ Order successful!</font></font></h1>
+                    <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Your order has been successfully placed.</font></font></p>
+                    <div id="orderDetails" class="order-details"></div>
+                    <button class="btn btn--primary" onclick="showPage(&#39;homepage&#39;)"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Continue shopping</font></font></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" class="page">
+            <div class="admin-container">
+                <div class="admin-sidebar">
+                    <h2><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Admin Panel</font></font></h2>
+                    <nav class="admin-nav">
+                        <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#" class="admin-nav-link active" data-section="products"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Product Management</font></font></a>
+                        <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#" class="admin-nav-link" data-section="orders"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">orders</font></font></a>
+                        <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#" class="admin-nav-link" data-section="customers"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Customer</font></font></a>
+                        <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#" id="adminLogout" class="admin-nav-link"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Logout</font></font></a>
+                    </nav>
+                </div>
+                
+                <div class="admin-content">
+                    <!-- Product Management -->
+                    <div id="adminProducts" class="admin-section active">
+                        <div class="admin-header">
+                            <h1><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Product Management</font></font></h1>
+                            <button id="addProductBtn" class="btn btn--primary"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Add a new product</font></font></button>
+                        </div>
+                        <div id="adminProductsGrid" class="admin-products-grid"></div>
+                    </div>
+
+                    <!-- Orders Management -->
+                    <div id="adminOrders" class="admin-section">
+                        <h1><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">All orders</font></font></h1>
+                        <div id="adminOrdersList" class="admin-orders-list"></div>
+                    </div>
+
+                    <!-- Customers Management -->
+                    <div id="adminCustomers" class="admin-section">
+                        <h1><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Customer Information</font></font></h1>
+                        <div id="adminCustomersList" class="admin-customers-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Product Modal -->
+    <div id="addProductModal" class="modal hidden">
+        <div class="modal-content">
+            <h2><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Add a new product</font></font></h2>
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Product Name</font></font></label>
+                    <input type="text" id="newProductName" class="form-control" required="">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Price (₹)</font></font></label>
+                    <input type="number" id="newProductPrice" class="form-control" required="">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Category</font></font></label>
+                    <select id="newProductCategory" class="form-control" required="">
+                        <option value="T-Shirts"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">T-shirt</font></font></option>
+                        <option value="Hoodies"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Hoodie</font></font></option>
+                        <option value="Accessories"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">accessories</font></font></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Image URL</font></font></label>
+                    <input type="url" id="newProductImage" class="form-control" required="">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Description</font></font></label>
+                    <textarea id="newProductDescription" class="form-control" rows="3" required=""></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn--outline" id="closeModal"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Cancel</font></font></button>
+                    <button type="submit" class="btn btn--primary"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Add</font></font></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">NEXAARA</font></font></h3>
+                    <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Premium quality products</font></font></p>
+                </div>
+                <div class="footer-section">
+                    <h4><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Customer Service</font></font></h4>
+                    <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Contact Us</font></font></a>
+                    <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">FAQs</font></font></a>
+                    <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Return Policy</font></font></a>
+                </div>
+                <div class="footer-section">
+                    <h4><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Company</font></font></h4>
+                    <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">About Us</font></font></a>
+                    <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">career</font></font></a>
+                    <a href="https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/6c4163e461680c7d0b4a3f0b1cb9c9db/e52715a2-6560-4150-8a13-500818020499/index.html#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Privacy Policy</font></font></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">© 2025 NEXAARA. All rights reserved.</font></font></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./NEXAARA - Professional Online Shopping_files/app.js.download"></script><div id="goog-gt-tt" class="VIpgJd-yAWNEb-L7lbkb skiptranslate" style="border-radius: 12px; margin: 0 0 0 -23px; padding: 0; font-family: &#39;Google Sans&#39;, Arial, sans-serif;" data-id=""><div id="goog-gt-vt" class="VIpgJd-yAWNEb-hvhgNd"><div class="VIpgJd-yAWNEb-hvhgNd-Ud7fr"><img src="./NEXAARA - Professional Online Shopping_files/24px.svg" width="24" height="24" alt=""><div class=" VIpgJd-yAWNEb-hvhgNd-IuizWc-i3jM8c " dir="ltr">Original text</div></div><div class="VIpgJd-yAWNEb-hvhgNd-k77Iif"><div id="goog-gt-original-text" class="VIpgJd-yAWNEb-nVMfcd-fmcmS VIpgJd-yAWNEb-hvhgNd-axAV1"></div></div><div class="VIpgJd-yAWNEb-hvhgNd-N7Eqid ltr"><div class="VIpgJd-yAWNEb-hvhgNd-N7Eqid-B7I4Od ltr" dir="ltr"><div class="VIpgJd-yAWNEb-hvhgNd-UTujCb">Rate this translation</div><div class="VIpgJd-yAWNEb-hvhgNd-eO9mKe">Your feedback will be used to help improve Google Translate</div></div><div class="VIpgJd-yAWNEb-hvhgNd-xgov5 ltr"><button id="goog-gt-thumbUpButton" type="button" class="VIpgJd-yAWNEb-hvhgNd-bgm6sf" title="Good translation" aria-label="Good translation" aria-pressed="false"><span id="goog-gt-thumbUpIcon"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M21 7h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 0S7.08 6.85 7 7H2v13h16c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73V9c0-1.1-.9-2-2-2zM7 18H4V9h3v9zm14-7l-3 7H9V8l4.34-4.34L12 9h9v2z"></path></svg></span><span id="goog-gt-thumbUpIconFilled"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M21 7h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 0S7.08 6.85 7 7v13h11c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73V9c0-1.1-.9-2-2-2zM5 7H1v13h4V7z"></path></svg></span></button><button id="goog-gt-thumbDownButton" type="button" class="VIpgJd-yAWNEb-hvhgNd-bgm6sf" title="Poor translation" aria-label="Poor translation" aria-pressed="false"><span id="goog-gt-thumbDownIcon"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M3 17h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 24s7.09-6.85 7.17-7h5V4H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2zM17 6h3v9h-3V6zM3 13l3-7h9v10l-4.34 4.34L12 15H3v-2z"></path></svg></span><span id="goog-gt-thumbDownIconFilled"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M3 17h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 24s7.09-6.85 7.17-7V4H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2zm16 0h4V4h-4v13z"></path></svg></span></button></div></div><div id="goog-gt-votingHiddenPane" class="VIpgJd-yAWNEb-hvhgNd-aXYTce"><form id="goog-gt-votingForm" action="https://translate.googleapis.com/translate_voting?client=te_lib" method="post" target="votingFrame" class="VIpgJd-yAWNEb-hvhgNd-aXYTce"><input type="text" name="sl" id="goog-gt-votingInputSrcLang"><input type="text" name="tl" id="goog-gt-votingInputTrgLang"><input type="text" name="query" id="goog-gt-votingInputSrcText"><input type="text" name="gtrans" id="goog-gt-votingInputTrgText"><input type="text" name="vote" id="goog-gt-votingInputVote"></form><iframe name="votingFrame" frameborder="0" src="./NEXAARA - Professional Online Shopping_files/saved_resource.html"></iframe></div></div></div>
+
+</body></html>
