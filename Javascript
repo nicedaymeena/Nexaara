@@ -1,381 +1,997 @@
-/* NEXAARA Store — Frontend SPA using LocalStorage */
+// NEXAARA E-commerce Website JavaScript
 
-// Seed products
-const seedProducts = [
-  { id: 1, name: "NEXAARA Classic Black T‑Shirt", price: 499, category: "T-Shirts",
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800",
-    description: "Premium cotton टी‑शर्ट, soft feel और durable print." },
-  { id: 2, name: "NEXAARA Premium Hoodie", price: 1299, category: "Hoodies",
-    image: "https://images.unsplash.com/photo-1556821840-3a9c6c1a0e8f?w=800",
-    description: "Warm fleece lining के साथ आरामदायक premium hoodie." },
-  { id: 3, name: "NEXAARA White T‑Shirt", price: 449, category: "T-Shirts",
-    image: "https://images.unsplash.com/photo-1527719327859-c6ce80353573?w=800",
-    description: "Minimal look, breathable fabric, everyday wear." },
-  { id: 4, name: "NEXAARA Coffee Mug", price: 299, category: "Accessories",
-    image: "https://images.unsplash.com/photo-1514228742587-6b1558fcf93a?w=800",
-    description: "Ceramic mug with NEXAARA branding, 330ml." },
-  { id: 5, name: "NEXAARA Phone Case", price: 399, category: "Accessories",
-    image: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=800",
-    description: "Durable finish, precise cutouts, matte grip." },
-  { id: 6, name: "NEXAARA Gray Hoodie", price: 1199, category: "Hoodies",
-    image: "https://images.unsplash.com/photo-1556821840-3a9c6c1a0e8f?w=800",
-    description: "Daily comfort hoodie with soft fabric." },
-  { id: 7, name: "NEXAARA Logo Tee Orange", price: 549, category: "T-Shirts",
-    image: "https://images.unsplash.com/photo-1503342217505-b0a15cf70489?w=800",
-    description: "Vibrant logo print with shoulder-to-shoulder taping." },
-  { id: 8, name: "NEXAARA Tote Bag", price: 349, category: "Accessories",
-    image: "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=800",
-    description: "Eco friendly canvas tote for daily use." },
+// Sample data initialization
+const initialProducts = [
+    {
+        id: 1,
+        name: "NEXAARA Classic Black T-Shirt",
+        price: 499,
+        category: "T-Shirts",
+        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400",
+        description: "Premium quality cotton t-shirt with NEXAARA logo"
+    },
+    {
+        id: 2,
+        name: "NEXAARA Premium Hoodie",
+        price: 1299,
+        category: "Hoodies", 
+        image: "https://images.unsplash.com/photo-1556821840-3a9c6c1a0e8f?w=400",
+        description: "Comfortable hoodie perfect for casual wear"
+    },
+    {
+        id: 3,
+        name: "NEXAARA White T-Shirt",
+        price: 449,
+        category: "T-Shirts",
+        image: "https://images.unsplash.com/photo-1527719327859-c6ce80353573?w=400", 
+        description: "Clean white cotton t-shirt with minimalist design"
+    },
+    {
+        id: 4,
+        name: "NEXAARA Coffee Mug",
+        price: 299,
+        category: "Accessories",
+        image: "https://images.unsplash.com/photo-1514228742587-6b1558fcf93a?w=400",
+        description: "Ceramic mug with NEXAARA branding"
+    },
+    {
+        id: 5,
+        name: "NEXAARA Phone Case",
+        price: 399,
+        category: "Accessories", 
+        image: "https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400",
+        description: "Durable phone case with premium finish"
+    },
+    {
+        id: 6,
+        name: "NEXAARA Gray Hoodie",
+        price: 1199,
+        category: "Hoodies",
+        image: "https://images.unsplash.com/photo-1556821840-3a9c6c1a0e8f?w=400",
+        description: "Stylish gray hoodie for everyday comfort"
+    }
 ];
 
-const ADMIN = { email: "admin@nexaara.com", password: "admin123" };
-
-const ls = {
-  get: (k, d) => JSON.parse(localStorage.getItem(k) || JSON.stringify(d)),
-  set: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+const adminCredentials = {
+    email: "admin@nexaara.com",
+    password: "admin123"
 };
 
-function initStore(){
-  if(!localStorage.getItem("nx_products")) ls.set("nx_products", seedProducts);
-  if(!localStorage.getItem("nx_orders")) ls.set("nx_orders", []);
-  if(!localStorage.getItem("nx_customers")) ls.set("nx_customers", []);
-  if(!localStorage.getItem("nx_cart")) ls.set("nx_cart", []);
-}
-initStore();
+// Data Management
+class DataManager {
+    constructor() {
+        this.initializeData();
+    }
 
-const q = s => document.querySelector(s);
-const qa = s => [...document.querySelectorAll(s)];
-const state = { view:"home", user:null, admin:false, product:null, filter:null };
-
-// Router
-function show(view){
-  qa(".view").forEach(v=>v.classList.remove("active"));
-  q(`#${view}View`).classList.add("active");
-  state.view = view;
-}
-function toast(msg){ alert(msg); }
-
-// Render chips
-function renderChips(){
-  const cats = ["All","T-Shirts","Hoodies","Accessories"];
-  const wrap = q("#catChips"); wrap.innerHTML="";
-  cats.forEach(c=>{
-    const b = document.createElement("button");
-    b.className = "chip"+(state.filter===c?" active":"");
-    b.textContent = c;
-    b.onclick = ()=>{ state.filter = c==="All"?null:c; renderProducts(); };
-    wrap.appendChild(b);
-  });
-}
-
-// Render product list
-function getProducts(){ return ls.get("nx_products", []); }
-function renderProducts(){
-  renderChips();
-  const grid = q("#productGrid");
-  let list = getProducts();
-  const term = q("#searchInput").value.trim().toLowerCase();
-  if(state.filter) list = list.filter(p=>p.category===state.filter);
-  if(term) list = list.filter(p=>p.name.toLowerCase().includes(term));
-  grid.innerHTML = list.map(p => `
-    <div class="card">
-      <img src="${p.image}" alt="${p.name}"/>
-      <h4>${p.name}</h4>
-      <div class="muted">${p.category}</div>
-      <div class="card__foot">
-        <div class="price">₹${p.price}</div>
-        <div>
-          <button class="btn btn--lite" data-id="${p.id}" data-act="view">View</button>
-          <button class="btn" data-id="${p.id}" data-act="add">Add</button>
-        </div>
-      </div>
-    </div>
-  `).join("");
-  grid.querySelectorAll("button").forEach(b=>{
-    b.onclick = e=>{
-      const id = +b.dataset.id;
-      if(b.dataset.act==="add") addToCart(id);
-      else openDetail(id);
-    };
-  });
-}
-
-// Product detail
-function openDetail(id){
-  const p = getProducts().find(x=>x.id===id);
-  state.product = p;
-  const el = q("#productDetail");
-  el.innerHTML = `
-    <img src="${p.image}" alt="${p.name}"/>
-    <div>
-      <h2>${p.name}</h2>
-      <div class="badge">${p.category}</div>
-      <p class="muted">${p.description}</p>
-      <h3>₹${p.price}</h3>
-      <div class="buy">
-        <button class="btn" id="detailAdd">Add to Cart</button>
-      </div>
-    </div>
-  `;
-  q("#detailAdd").onclick = ()=> addToCart(p.id);
-  show("product");
-}
-q("#backToHome").onclick = ()=> show("home");
-
-// Cart
-function getCart(){ return ls.get("nx_cart", []); }
-function setCart(v){ ls.set("nx_cart", v); updateCartBadge(); }
-function updateCartBadge(){ q("#cartCount").textContent = getCart().reduce((a,c)=>a+c.qty,0); }
-function addToCart(id){
-  const cart = getCart();
-  const idx = cart.findIndex(i=>i.id===id);
-  if(idx>-1) cart[idx].qty++;
-  else cart.push({ id, qty:1 });
-  setCart(cart);
-  toast("Added to cart");
-}
-function renderCart(){
-  const list = getCart();
-  const products = getProducts();
-  const wrap = q("#cartList");
-  if(!list.length){ wrap.innerHTML = "<p class='muted'>Cart is empty.</p>"; }
-  else{
-    wrap.innerHTML = list.map(it=>{
-      const p = products.find(x=>x.id===it.id);
-      return `
-        <div class="item">
-          <img src="${p.image}"/>
-          <div>
-            <div>${p.name}</div>
-            <div class="muted">₹${p.price} × ${it.qty}</div>
-          </div>
-          <div class="qty" data-id="${p.id}">
-            <button data-op="-">−</button>
-            <span>${it.qty}</span>
-            <button data-op="+">+</button>
-          </div>
-          <div>
-            <div>₹${p.price*it.qty}</div>
-            <button class="link" data-remove="${p.id}">Remove</button>
-          </div>
-        </div>
-      `;
-    }).join("");
-    wrap.querySelectorAll("[data-op]").forEach(b=>{
-      b.onclick = ()=>{
-        const id = +b.parentElement.dataset.id;
-        const op = b.dataset.op;
-        const cart = getCart();
-        const i = cart.findIndex(x=>x.id===id);
-        if(i>-1){
-          cart[i].qty += (op==="+"?1:-1);
-          if(cart[i].qty<=0) cart.splice(i,1);
-          setCart(cart); renderCart();
+    initializeData() {
+        // Initialize products if not exists
+        if (!localStorage.getItem('nexaaraProducts')) {
+            localStorage.setItem('nexaaraProducts', JSON.stringify(initialProducts));
         }
-      };
-    });
-    wrap.querySelectorAll("[data-remove]").forEach(b=>{
-      b.onclick = ()=>{ setCart(getCart().filter(x=>x.id!==+b.dataset.remove)); renderCart(); };
-    });
-  }
-  const total = list.reduce((sum, it)=>{
-    const p = products.find(x=>x.id===it.id); return sum + p.price*it.qty;
-  },0);
-  q("#cartItemsCount").textContent = list.reduce((a,c)=>a+c.qty,0);
-  q("#cartTotal").textContent = total;
-  q("#payableAmount").textContent = total;
-}
-q("#continueShopping").onclick = ()=> show("home");
+        
+        // Initialize other data structures
+        if (!localStorage.getItem('nexaaraUsers')) {
+            localStorage.setItem('nexaaraUsers', JSON.stringify([]));
+        }
+        
+        if (!localStorage.getItem('nexaaraOrders')) {
+            localStorage.setItem('nexaaraOrders', JSON.stringify([]));
+        }
+        
+        if (!localStorage.getItem('nexaaraCart')) {
+            localStorage.setItem('nexaaraCart', JSON.stringify([]));
+        }
+        
+        if (!localStorage.getItem('nexaaraCurrentUser')) {
+            localStorage.setItem('nexaaraCurrentUser', JSON.stringify(null));
+        }
+        
+        if (!localStorage.getItem('nexaaraNextProductId')) {
+            localStorage.setItem('nexaaraNextProductId', JSON.stringify(7));
+        }
+        
+        if (!localStorage.getItem('nexaaraNextOrderId')) {
+            localStorage.setItem('nexaaraNextOrderId', JSON.stringify(1));
+        }
+    }
 
-// Checkout navigation
-q("#goToCustomer").onclick = ()=>{
-  if(getCart().length===0){ toast("Cart खाली है"); return; }
-  show("customer");
-};
-q("#backToCart").onclick = ()=> show("cart");
-q("#backToCustomer").onclick = ()=> show("customer");
+    // Products
+    getProducts() {
+        return JSON.parse(localStorage.getItem('nexaaraProducts') || '[]');
+    }
 
-// Customer info
-q("#customerForm").onsubmit = e=>{
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  ls.set("nx_checkout_customer", data);
-  show("payment");
-};
+    setProducts(products) {
+        localStorage.setItem('nexaaraProducts', JSON.stringify(products));
+    }
 
-// Payment (simulate UPI)
-q("#upiForm").onsubmit = e=>{
-  e.preventDefault();
-  const { vpa, note } = Object.fromEntries(new FormData(e.target).entries());
-  if(!vpa.includes("@")){ toast("Valid UPI ID दर्ज करें"); return; }
-  // create order
-  const products = getProducts();
-  const cart = getCart();
-  const items = cart.map(it=>{
-    const p = products.find(x=>x.id===it.id);
-    return { id:p.id, name:p.name, price:p.price, qty:it.qty };
-  });
-  const amount = items.reduce((s,i)=>s+i.price*i.qty,0);
-  const order = {
-    id: "NX"+Date.now(),
-    items, amount,
-    customer: ls.get("nx_checkout_customer", {}),
-    vpa, note, status:"paid",
-    at: new Date().toISOString()
-  };
-  const orders = ls.get("nx_orders", []); orders.unshift(order); ls.set("nx_orders", orders);
-  setCart([]); // clear
-  q("#orderId").textContent = order.id;
-  show("success");
-};
+    addProduct(product) {
+        const products = this.getProducts();
+        const nextId = JSON.parse(localStorage.getItem('nexaaraNextProductId') || '7');
+        product.id = nextId;
+        products.push(product);
+        this.setProducts(products);
+        localStorage.setItem('nexaaraNextProductId', JSON.stringify(nextId + 1));
+        return product;
+    }
 
-// Login / Signup (simple local)
-const loginDialog = q("#loginDialog");
-q("#loginOpenBtn").onclick = ()=> loginDialog.showModal();
-q("#logoutBtn").onclick = ()=>{
-  state.user=null; state.admin=false;
-  q("#logoutBtn").classList.add("hidden");
-  q("#loginOpenBtn").classList.remove("hidden");
-  toast("Logged out");
-};
-q("#loginForm").onsubmit = e=>{
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  let users = ls.get("nx_customers", []);
-  let user = users.find(u=>u.email===data.email);
-  if(!user){
-    user = { id: Date.now(), ...data };
-    users.push(user); ls.set("nx_customers", users);
-  }
-  state.user = user;
-  q("#loginOpenBtn").classList.add("hidden");
-  q("#logoutBtn").classList.remove("hidden");
-  loginDialog.close();
-  toast("Welcome, "+user.name);
-};
+    deleteProduct(id) {
+        const products = this.getProducts().filter(p => p.id !== id);
+        this.setProducts(products);
+    }
 
-// Admin
-q("#adminPanelBtn").onclick = ()=> show("adminLogin");
-q("#adminLoginForm").onsubmit = e=>{
-  e.preventDefault();
-  const { email, password } = Object.fromEntries(new FormData(e.target).entries());
-  if(email===ADMIN.email && password===ADMIN.password){
-    state.admin = true; renderAdmin(); show("admin");
-  } else toast("Invalid admin credentials");
-};
-q("#adminLogout").onclick = ()=>{ state.admin=false; show("home"); };
+    getProductById(id) {
+        return this.getProducts().find(p => p.id === parseInt(id));
+    }
 
-// Admin: render sections
-function renderAdmin(){
-  // products
-  const products = getProducts();
-  const elP = q("#adminProducts");
-  elP.innerHTML = products.map(p=>`
-    <div class="row">
-      <img src="${p.image}"/>
-      <div>
-        <div>${p.name}</div>
-        <div class="muted">${p.category}</div>
-      </div>
-      <div>₹${p.price}</div>
-      <div>
-        <button class="btn btn--lite" data-edit="${p.id}">Edit</button>
-        <button class="link" data-del="${p.id}" style="color:#fca5a5">Delete</button>
-      </div>
-    </div>
-  `).join("");
-  elP.querySelectorAll("[data-del]").forEach(b=>{
-    b.onclick = ()=> {
-      const list = getProducts().filter(x=>x.id!==+b.dataset.del);
-      ls.set("nx_products", list); renderAdmin(); renderProducts();
-    };
-  });
-  elP.querySelectorAll("[data-edit]").forEach(b=>{
-    b.onclick = ()=> openProductForm(+b.dataset.edit);
-  });
+    // Users
+    getUsers() {
+        return JSON.parse(localStorage.getItem('nexaaraUsers') || '[]');
+    }
 
-  // orders
-  const orders = ls.get("nx_orders", []);
-  const elO = q("#adminOrders");
-  elO.innerHTML = orders.map(o=>`
-    <div class="row">
-      <div class="badge">${o.items.length} items</div>
-      <div>
-        <div>#${o.id}</div>
-        <div class="muted">${new Date(o.at).toLocaleString()}</div>
-      </div>
-      <div>₹${o.amount}</div>
-      <div><span class="badge">paid</span></div>
-    </div>
-  `).join("") || "<p class='muted'>No orders yet.</p>";
+    addUser(user) {
+        const users = this.getUsers();
+        users.push(user);
+        localStorage.setItem('nexaaraUsers', JSON.stringify(users));
+    }
 
-  // customers
-  const customers = ls.get("nx_customers", []);
-  const elC = q("#adminCustomers");
-  elC.innerHTML = customers.map(c=>`
-    <div class="row">
-      <div class="badge">${c.name[0]?.toUpperCase() || "U"}</div>
-      <div>
-        <div>${c.name}</div>
-        <div class="muted">${c.email} — ${c.mobile}</div>
-      </div>
-      <div></div>
-      <div></div>
-    </div>
-  `).join("") || "<p class='muted'>No customers yet.</p>";
+    getUserByEmail(email) {
+        return this.getUsers().find(u => u.email === email);
+    }
+
+    // Current User
+    getCurrentUser() {
+        return JSON.parse(localStorage.getItem('nexaaraCurrentUser'));
+    }
+
+    setCurrentUser(user) {
+        localStorage.setItem('nexaaraCurrentUser', JSON.stringify(user));
+    }
+
+    logout() {
+        localStorage.setItem('nexaaraCurrentUser', JSON.stringify(null));
+        localStorage.setItem('nexaaraCart', JSON.stringify([]));
+    }
+
+    // Cart
+    getCart() {
+        return JSON.parse(localStorage.getItem('nexaaraCart') || '[]');
+    }
+
+    setCart(cart) {
+        localStorage.setItem('nexaaraCart', JSON.stringify(cart));
+    }
+
+    addToCart(productId, quantity = 1) {
+        const cart = this.getCart();
+        const existingItem = cart.find(item => item.productId === productId);
+        
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            cart.push({ productId, quantity });
+        }
+        
+        this.setCart(cart);
+        return cart;
+    }
+
+    removeFromCart(productId) {
+        const cart = this.getCart().filter(item => item.productId !== productId);
+        this.setCart(cart);
+        return cart;
+    }
+
+    updateCartQuantity(productId, quantity) {
+        const cart = this.getCart();
+        const item = cart.find(item => item.productId === productId);
+        if (item) {
+            item.quantity = quantity;
+            this.setCart(cart);
+        }
+        return cart;
+    }
+
+    clearCart() {
+        this.setCart([]);
+    }
+
+    // Orders
+    getOrders() {
+        return JSON.parse(localStorage.getItem('nexaaraOrders') || '[]');
+    }
+
+    addOrder(order) {
+        const orders = this.getOrders();
+        const nextId = JSON.parse(localStorage.getItem('nexaaraNextOrderId') || '1');
+        order.id = nextId;
+        order.date = new Date().toISOString();
+        orders.push(order);
+        localStorage.setItem('nexaaraOrders', JSON.stringify(orders));
+        localStorage.setItem('nexaaraNextOrderId', JSON.stringify(nextId + 1));
+        return order;
+    }
 }
 
-// Product add/edit dialog
-const productDialog = q("#productModal");
-q("#addProductBtn").onclick = ()=> openProductForm();
+// Application Manager
+class NexaaraApp {
+    constructor() {
+        this.dataManager = new DataManager();
+        this.currentPage = 'homepage';
+        this.init();
+    }
 
-function openProductForm(id){
-  const form = q("#productForm");
-  form.reset();
-  if(id){
-    const p = getProducts().find(x=>x.id===id);
-    form.name.value = p.name;
-    form.price.value = p.price;
-    form.category.value = p.category;
-    form.image.value = p.image;
-    form.description.value = p.description;
-    form.id.value = p.id;
-    q("#productFormTitle").textContent = "Edit Product";
-  }else{
-    q("#productFormTitle").textContent = "Add Product";
-  }
-  productDialog.showModal();
+    init() {
+        this.setupEventListeners();
+        this.updateCartCount();
+        this.showPage('homepage');
+        this.renderFeaturedProducts();
+        this.checkAuthState();
+        this.setupKeyboardEvents();
+    }
+
+    setupEventListeners() {
+        // Navigation
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            if (this.dataManager.getCurrentUser()) {
+                this.dataManager.logout();
+                this.updateAuthUI();
+                this.showPage('homepage');
+                this.showMessage('à¤¸à¤«à¤²à¤¤à¤¾à¤ªà¥‚à¤°à¥à¤µà¤• à¤²à¥‰à¤—à¤†à¤‰à¤Ÿ à¤¹à¥‹ à¤—à¤', 'success');
+            } else {
+                this.showPage('loginPage');
+            }
+        });
+
+        document.getElementById('cartBtn').addEventListener('click', () => {
+            this.showPage('cartPage');
+            this.renderCart();
+        });
+
+        document.getElementById('shopNowBtn').addEventListener('click', () => {
+            this.showPage('productsPage');
+            this.renderProducts();
+        });
+
+        // Search functionality
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            this.performSearch();
+        });
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                this.performSearch();
+            }
+        });
+
+        // Category cards
+        document.querySelectorAll('.category-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const category = card.dataset.category;
+                this.showPage('productsPage');
+                this.renderProducts(category);
+            });
+        });
+
+        // Auth forms
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleLogin();
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSignup();
+        });
+
+        document.getElementById('showSignup').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showPage('signupPage');
+        });
+
+        document.getElementById('showLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showPage('loginPage');
+        });
+
+        document.getElementById('adminLoginLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showAdminLoginForm();
+        });
+
+        // Product filters
+        document.getElementById('categoryFilter').addEventListener('change', () => {
+            this.renderProducts();
+        });
+
+        document.getElementById('sortFilter').addEventListener('change', () => {
+            this.renderProducts();
+        });
+
+        // Checkout
+        document.getElementById('checkoutBtn').addEventListener('click', () => {
+            if (!this.dataManager.getCurrentUser()) {
+                this.showMessage('à¤•à¥ƒà¤ªà¤¯à¤¾ à¤ªà¤¹à¤²à¥‡ à¤²à¥‰à¤—à¤¿à¤¨ à¤•à¤°à¥‡à¤‚', 'error');
+                this.showPage('loginPage');
+                return;
+            }
+            this.showPage('checkoutPage');
+            this.showCheckoutStep('customerInfoStep');
+        });
+
+        document.getElementById('customerInfoForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.showCheckoutStep('paymentStep');
+            this.renderOrderSummary();
+        });
+
+        document.getElementById('upiForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.processPayment();
+        });
+
+        // Admin functionality
+        document.getElementById('addProductBtn').addEventListener('click', () => {
+            this.showModal('addProductModal');
+        });
+
+        document.getElementById('addProductForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleAddProduct();
+        });
+
+        document.getElementById('closeModal').addEventListener('click', () => {
+            this.hideModal('addProductModal');
+        });
+
+        // Admin navigation
+        document.querySelectorAll('.admin-nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (link.id === 'adminLogout') {
+                    this.dataManager.logout();
+                    this.updateAuthUI();
+                    this.showPage('homepage');
+                    this.showMessage('à¤à¤¡à¤®à¤¿à¤¨ à¤²à¥‰à¤—à¤†à¤‰à¤Ÿ à¤¸à¤«à¤²', 'success');
+                    return;
+                }
+                
+                const section = link.dataset.section;
+                if (section) {
+                    this.showAdminSection(section);
+                }
+            });
+        });
+
+        // Modal close functionality
+        document.addEventListener('click', (e) => {
+            const modal = document.querySelector('.modal:not(.hidden)');
+            if (modal && e.target === modal) {
+                this.hideModal(modal.id);
+            }
+        });
+    }
+
+    setupKeyboardEvents() {
+        document.addEventListener('keydown', (e) => {
+            // Close modal with Escape key
+            if (e.key === 'Escape') {
+                const modal = document.querySelector('.modal:not(.hidden)');
+                if (modal) {
+                    this.hideModal(modal.id);
+                }
+            }
+
+            // Go back to homepage with Home key
+            if (e.key === 'Home' && !e.target.matches('input, textarea')) {
+                this.showPage('homepage');
+            }
+        });
+    }
+
+    showPage(pageId) {
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        
+        // Show selected page
+        document.getElementById(pageId).classList.add('active');
+        this.currentPage = pageId;
+        
+        // Load page-specific content
+        if (pageId === 'productsPage') {
+            this.renderProducts();
+        } else if (pageId === 'adminDashboard') {
+            this.renderAdminDashboard();
+        }
+
+        // Scroll to top when changing pages
+        window.scrollTo(0, 0);
+    }
+
+    performSearch() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        if (query) {
+            this.showPage('productsPage');
+            this.renderProducts(null, query);
+        }
+    }
+
+    renderFeaturedProducts() {
+        const container = document.getElementById('featuredProductsGrid');
+        const products = this.dataManager.getProducts().slice(0, 6);
+        this.renderProductGrid(container, products);
+    }
+
+    renderProducts(categoryFilter = null, searchQuery = null) {
+        const container = document.getElementById('productsGrid');
+        let products = this.dataManager.getProducts();
+
+        // Apply category filter
+        const categorySelect = document.getElementById('categoryFilter');
+        const selectedCategory = categoryFilter || categorySelect?.value;
+        if (selectedCategory) {
+            products = products.filter(p => p.category === selectedCategory);
+            // Update the filter dropdown to reflect the selection
+            if (categorySelect) {
+                categorySelect.value = selectedCategory;
+            }
+        }
+
+        // Apply search filter
+        if (searchQuery) {
+            products = products.filter(p => 
+                p.name.toLowerCase().includes(searchQuery) ||
+                p.description.toLowerCase().includes(searchQuery)
+            );
+        }
+
+        // Apply sorting
+        const sortSelect = document.getElementById('sortFilter');
+        const sortBy = sortSelect?.value || 'name';
+        products = this.sortProducts(products, sortBy);
+
+        this.renderProductGrid(container, products);
+
+        if (products.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>à¤•à¥‹à¤ˆ à¤‰à¤¤à¥à¤ªà¤¾à¤¦ à¤¨à¤¹à¥€à¤‚ à¤®à¤¿à¤²à¤¾</h3>
+                    <p>à¤•à¥ƒà¤ªà¤¯à¤¾ à¤…à¤ªà¤¨à¤¾ à¤–à¥‹à¤œ à¤¯à¤¾ à¤«à¤¿à¤²à¥à¤Ÿà¤° à¤¬à¤¦à¤²à¥‡à¤‚</p>
+                    <button class="btn btn--primary" onclick="app.showPage('homepage')">
+                        à¤¹à¥‹à¤®à¤ªà¥‡à¤œ à¤ªà¤° à¤µà¤¾à¤ªà¤¸ à¤œà¤¾à¤à¤‚
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    renderProductGrid(container, products) {
+        container.innerHTML = products.map(product => `
+            <div class="product-card" onclick="app.showProductDetail(${product.id})">
+                <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
+                <div class="product-info">
+                    <h3 class="product-name">${product.name}</h3>
+                    <p class="product-price">â‚¹${product.price}</p>
+                    <p class="product-description">${product.description}</p>
+                    <button class="btn btn--primary" onclick="event.stopPropagation(); app.addToCart(${product.id})">
+                        à¤•à¤¾à¤°à¥à¤Ÿ à¤®à¥‡à¤‚ à¤œà¥‹à¤¡à¤¼à¥‡à¤‚
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    sortProducts(products, sortBy) {
+        switch (sortBy) {
+            case 'price-low':
+                return products.sort((a, b) => a.price - b.price);
+            case 'price-high':
+                return products.sort((a, b) => b.price - a.price);
+            case 'name':
+            default:
+                return products.sort((a, b) => a.name.localeCompare(b.name));
+        }
+    }
+
+    showProductDetail(productId) {
+        const product = this.dataManager.getProductById(productId);
+        if (!product) return;
+
+        const container = document.getElementById('productDetail');
+        container.innerHTML = `
+            <div>
+                <img src="${product.image}" alt="${product.name}" class="product-detail-image">
+            </div>
+            <div class="product-detail-info">
+                <h1>${product.name}</h1>
+                <p class="product-detail-price">â‚¹${product.price}</p>
+                <p class="product-detail-description">${product.description}</p>
+                <div class="quantity-selector">
+                    <span>à¤®à¤¾à¤¤à¥à¤°à¤¾:</span>
+                    <button class="quantity-btn" onclick="app.decreaseQuantity()">-</button>
+                    <input type="number" id="productQuantity" class="quantity-input form-control" value="1" min="1" max="10">
+                    <button class="quantity-btn" onclick="app.increaseQuantity()">+</button>
+                </div>
+                <button class="btn btn--primary btn--lg" onclick="app.addToCartWithQuantity(${product.id})">
+                    à¤•à¤¾à¤°à¥à¤Ÿ à¤®à¥‡à¤‚ à¤œà¥‹à¤¡à¤¼à¥‡à¤‚
+                </button>
+                <button class="btn btn--outline btn--lg" onclick="app.showPage('productsPage')">
+                    à¤µà¤¾à¤ªà¤¸ à¤‰à¤¤à¥à¤ªà¤¾à¤¦à¥‹à¤‚ à¤ªà¤° à¤œà¤¾à¤à¤‚
+                </button>
+            </div>
+        `;
+
+        this.showPage('productDetailPage');
+    }
+
+    increaseQuantity() {
+        const input = document.getElementById('productQuantity');
+        const current = parseInt(input.value);
+        if (current < 10) {
+            input.value = current + 1;
+        }
+    }
+
+    decreaseQuantity() {
+        const input = document.getElementById('productQuantity');
+        const current = parseInt(input.value);
+        if (current > 1) {
+            input.value = current - 1;
+        }
+    }
+
+    addToCart(productId, quantity = 1) {
+        this.dataManager.addToCart(productId, quantity);
+        this.updateCartCount();
+        this.showMessage('à¤‰à¤¤à¥à¤ªà¤¾à¤¦ à¤•à¤¾à¤°à¥à¤Ÿ à¤®à¥‡à¤‚ à¤œà¥‹à¤¡à¤¼à¤¾ à¤—à¤¯à¤¾', 'success');
+    }
+
+    addToCartWithQuantity(productId) {
+        const quantity = parseInt(document.getElementById('productQuantity').value);
+        this.addToCart(productId, quantity);
+    }
+
+    updateCartCount() {
+        const cart = this.dataManager.getCart();
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const countElement = document.getElementById('cartCount');
+        countElement.textContent = totalItems;
+        
+        if (totalItems > 0) {
+            countElement.parentElement.classList.add('cart-count-animate');
+            setTimeout(() => {
+                countElement.parentElement.classList.remove('cart-count-animate');
+            }, 300);
+        }
+    }
+
+    renderCart() {
+        const container = document.getElementById('cartItems');
+        const cart = this.dataManager.getCart();
+        const products = this.dataManager.getProducts();
+
+        if (cart.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>à¤†à¤ªà¤•à¤¾ à¤•à¤¾à¤°à¥à¤Ÿ à¤–à¤¾à¤²à¥€ à¤¹à¥ˆ</h3>
+                    <p>à¤•à¥à¤› à¤‰à¤¤à¥à¤ªà¤¾à¤¦ à¤œà¥‹à¤¡à¤¼à¥‡à¤‚</p>
+                    <button class="btn btn--primary" onclick="app.showPage('productsPage')">
+                        à¤–à¤°à¥€à¤¦à¤¾à¤°à¥€ à¤•à¤°à¥‡à¤‚
+                    </button>
+                </div>
+            `;
+            document.getElementById('cartSummary').style.display = 'none';
+            return;
+        }
+
+        let total = 0;
+        const cartHTML = cart.map(item => {
+            const product = products.find(p => p.id === item.productId);
+            if (!product) return '';
+            
+            const itemTotal = product.price * item.quantity;
+            total += itemTotal;
+
+            return `
+                <div class="cart-item">
+                    <img src="${product.image}" alt="${product.name}" class="cart-item-image">
+                    <div class="cart-item-info">
+                        <h4 class="cart-item-name">${product.name}</h4>
+                        <p class="cart-item-price">â‚¹${product.price} x ${item.quantity} = â‚¹${itemTotal}</p>
+                    </div>
+                    <div class="cart-item-controls">
+                        <div class="cart-item-quantity">
+                            <button class="btn btn--sm btn--outline" onclick="app.updateCartItem(${product.id}, ${item.quantity - 1})">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="btn btn--sm btn--outline" onclick="app.updateCartItem(${product.id}, ${item.quantity + 1})">+</button>
+                        </div>
+                        <button class="btn btn--sm btn--danger" onclick="app.removeFromCart(${product.id})">à¤¹à¤Ÿà¤¾à¤à¤‚</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = cartHTML;
+        document.getElementById('cartTotal').textContent = total;
+        document.getElementById('cartSummary').style.display = 'block';
+    }
+
+    updateCartItem(productId, newQuantity) {
+        if (newQuantity <= 0) {
+            this.removeFromCart(productId);
+        } else {
+            this.dataManager.updateCartQuantity(productId, newQuantity);
+            this.updateCartCount();
+            this.renderCart();
+        }
+    }
+
+    removeFromCart(productId) {
+        this.dataManager.removeFromCart(productId);
+        this.updateCartCount();
+        this.renderCart();
+        this.showMessage('à¤‰à¤¤à¥à¤ªà¤¾à¤¦ à¤•à¤¾à¤°à¥à¤Ÿ à¤¸à¥‡ à¤¹à¤Ÿà¤¾à¤¯à¤¾ à¤—à¤¯à¤¾', 'success');
+    }
+
+    handleLogin() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        // Check admin credentials first
+        if (email === adminCredentials.email && password === adminCredentials.password) {
+            this.dataManager.setCurrentUser({ name: 'Admin', email, isAdmin: true });
+            this.updateAuthUI();
+            this.showPage('adminDashboard');
+            this.showMessage('à¤à¤¡à¤®à¤¿à¤¨ à¤²à¥‰à¤—à¤¿à¤¨ à¤¸à¤«à¤²', 'success');
+            return;
+        }
+
+        // Check regular user credentials
+        const user = this.dataManager.getUserByEmail(email);
+        if (user && user.password === password) {
+            this.dataManager.setCurrentUser(user);
+            this.updateAuthUI();
+            this.showPage('homepage');
+            this.showMessage(`à¤¸à¥à¤µà¤¾à¤—à¤¤ à¤¹à¥ˆ, ${user.name}!`, 'success');
+        } else {
+            this.showMessage('à¤—à¤²à¤¤ à¤ˆà¤®à¥‡à¤² à¤¯à¤¾ à¤ªà¤¾à¤¸à¤µà¤°à¥à¤¡', 'error');
+        }
+    }
+
+    handleSignup() {
+        const name = document.getElementById('signupName').value;
+        const email = document.getElementById('signupEmail').value;
+        const mobile = document.getElementById('signupMobile').value;
+        const password = document.getElementById('signupPassword').value;
+
+        // Check if user already exists
+        if (this.dataManager.getUserByEmail(email)) {
+            this.showMessage('à¤¯à¤¹ à¤ˆà¤®à¥‡à¤² à¤ªà¤¹à¤²à¥‡ à¤¸à¥‡ à¤ªà¤‚à¤œà¥€à¤•à¥ƒà¤¤ à¤¹à¥ˆ', 'error');
+            return;
+        }
+
+        const user = { name, email, mobile, password };
+        this.dataManager.addUser(user);
+        this.dataManager.setCurrentUser(user);
+        this.updateAuthUI();
+        this.showPage('homepage');
+        this.showMessage('à¤–à¤¾à¤¤à¤¾ à¤¸à¤«à¤²à¤¤à¤¾à¤ªà¥‚à¤°à¥à¤µà¤• à¤¬à¤¨à¤¾à¤¯à¤¾ à¤—à¤¯à¤¾!', 'success');
+    }
+
+    showAdminLoginForm() {
+        this.showPage('loginPage');
+        // Pre-fill admin credentials for easy access
+        document.getElementById('loginEmail').value = adminCredentials.email;
+        document.getElementById('loginPassword').value = adminCredentials.password;
+        this.showMessage('à¤à¤¡à¤®à¤¿à¤¨ à¤•à¥à¤°à¥‡à¤¡à¥‡à¤‚à¤¶à¤¿à¤¯à¤² à¤­à¤°à¥‡ à¤—à¤ à¤¹à¥ˆà¤‚, à¤²à¥‰à¤—à¤¿à¤¨ à¤¬à¤Ÿà¤¨ à¤¦à¤¬à¤¾à¤à¤‚', 'info');
+    }
+
+    updateAuthUI() {
+        const user = this.dataManager.getCurrentUser();
+        const loginBtn = document.getElementById('loginBtn');
+        
+        if (user) {
+            loginBtn.textContent = user.isAdmin ? 'à¤à¤¡à¤®à¤¿à¤¨ à¤²à¥‰à¤—à¤†à¤‰à¤Ÿ' : `à¤²à¥‰à¤—à¤†à¤‰à¤Ÿ (${user.name})`;
+            loginBtn.classList.remove('btn--outline');
+            loginBtn.classList.add('btn--secondary');
+        } else {
+            loginBtn.textContent = 'à¤²à¥‰à¤—à¤¿à¤¨';
+            loginBtn.classList.remove('btn--secondary');
+            loginBtn.classList.add('btn--outline');
+        }
+    }
+
+    checkAuthState() {
+        const user = this.dataManager.getCurrentUser();
+        if (user && user.isAdmin) {
+            this.showPage('adminDashboard');
+        }
+        this.updateAuthUI();
+    }
+
+    showCheckoutStep(stepId) {
+        document.querySelectorAll('.checkout-step').forEach(step => {
+            step.classList.remove('active');
+        });
+        document.getElementById(stepId).classList.add('active');
+    }
+
+    renderOrderSummary() {
+        const cart = this.dataManager.getCart();
+        const products = this.dataManager.getProducts();
+        const container = document.getElementById('orderItems');
+        
+        let total = 0;
+        const orderHTML = cart.map(item => {
+            const product = products.find(p => p.id === item.productId);
+            if (!product) return '';
+            
+            const itemTotal = product.price * item.quantity;
+            total += itemTotal;
+
+            return `
+                <div class="order-item">
+                    <span>${product.name} x ${item.quantity}</span>
+                    <span>â‚¹${itemTotal}</span>
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = orderHTML;
+        document.getElementById('finalAmount').textContent = total;
+    }
+
+    processPayment() {
+        const customerName = document.getElementById('customerName').value;
+        const customerMobile = document.getElementById('customerMobile').value;
+        const customerAddress = document.getElementById('customerAddress').value;
+        const upiId = document.getElementById('upiId').value;
+        const user = this.dataManager.getCurrentUser();
+
+        // Show processing message
+        this.showMessage('à¤­à¥à¤—à¤¤à¤¾à¤¨ à¤ªà¥à¤°à¤•à¥à¤°à¤¿à¤¯à¤¾ à¤œà¤¾à¤°à¥€ à¤¹à¥ˆ...', 'info');
+
+        // Simulate payment processing
+        setTimeout(() => {
+            const cart = this.dataManager.getCart();
+            const products = this.dataManager.getProducts();
+            
+            let total = 0;
+            const orderItems = cart.map(item => {
+                const product = products.find(p => p.id === item.productId);
+                const itemTotal = product.price * item.quantity;
+                total += itemTotal;
+                return {
+                    productId: item.productId,
+                    productName: product.name,
+                    quantity: item.quantity,
+                    price: product.price,
+                    total: itemTotal
+                };
+            });
+
+            const order = {
+                userId: user.email,
+                customerName,
+                customerMobile,
+                customerAddress,
+                upiId,
+                items: orderItems,
+                total,
+                status: 'Confirmed'
+            };
+
+            this.dataManager.addOrder(order);
+            this.dataManager.clearCart();
+            this.updateCartCount();
+            
+            // Show confirmation
+            document.getElementById('orderDetails').innerHTML = `
+                <h3>à¤‘à¤°à¥à¤¡à¤° ID: #${order.id}</h3>
+                <p><strong>à¤—à¥à¤°à¤¾à¤¹à¤•:</strong> ${customerName}</p>
+                <p><strong>à¤®à¥‹à¤¬à¤¾à¤‡à¤²:</strong> ${customerMobile}</p>
+                <p><strong>à¤ªà¤¤à¤¾:</strong> ${customerAddress}</p>
+                <p><strong>à¤•à¥à¤² à¤°à¤¾à¤¶à¤¿:</strong> â‚¹${total}</p>
+                <p><strong>à¤­à¥à¤—à¤¤à¤¾à¤¨ à¤µà¤¿à¤§à¤¿:</strong> UPI (${upiId})</p>
+            `;
+            
+            this.showPage('confirmationPage');
+            this.showMessage('à¤‘à¤°à¥à¤¡à¤° à¤¸à¤«à¤²à¤¤à¤¾à¤ªà¥‚à¤°à¥à¤µà¤• à¤ªà¥à¤²à¥‡à¤¸ à¤¹à¥à¤†!', 'success');
+        }, 2000);
+    }
+
+    // Admin functionality
+    renderAdminDashboard() {
+        this.showAdminSection('products');
+    }
+
+    showAdminSection(sectionId) {
+        // Update nav
+        document.querySelectorAll('.admin-nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+
+        // Show section
+        document.querySelectorAll('.admin-section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(`admin${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}`).classList.add('active');
+
+        // Load section data
+        if (sectionId === 'products') {
+            this.renderAdminProducts();
+        } else if (sectionId === 'orders') {
+            this.renderAdminOrders();
+        } else if (sectionId === 'customers') {
+            this.renderAdminCustomers();
+        }
+    }
+
+    renderAdminProducts() {
+        const container = document.getElementById('adminProductsGrid');
+        const products = this.dataManager.getProducts();
+
+        container.innerHTML = products.map(product => `
+            <div class="admin-product-card">
+                <img src="${product.image}" alt="${product.name}" class="admin-product-image" loading="lazy">
+                <div class="admin-product-info">
+                    <h3>${product.name}</h3>
+                    <p class="admin-product-price">â‚¹${product.price}</p>
+                    <p><strong>à¤¶à¥à¤°à¥‡à¤£à¥€:</strong> ${product.category}</p>
+                    <p>${product.description}</p>
+                    <div class="admin-product-actions">
+                        <button class="btn btn--sm btn--danger" onclick="app.deleteProduct(${product.id})">
+                            à¤¡à¤¿à¤²à¥€à¤Ÿ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderAdminOrders() {
+        const container = document.getElementById('adminOrdersList');
+        const orders = this.dataManager.getOrders();
+
+        if (orders.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>à¤•à¥‹à¤ˆ à¤‘à¤°à¥à¤¡à¤° à¤¨à¤¹à¥€à¤‚ à¤®à¤¿à¤²à¤¾</h3>
+                    <p>à¤œà¤¬ à¤—à¥à¤°à¤¾à¤¹à¤• à¤‘à¤°à¥à¤¡à¤° à¤•à¤°à¥‡à¤‚à¤—à¥‡ à¤¤à¥‹ à¤µà¥‡ à¤¯à¤¹à¤¾à¤ à¤¦à¤¿à¤–à¥‡à¤‚à¤—à¥‡</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = orders.reverse().map(order => `
+            <div class="admin-order-item">
+                <div class="admin-order-header">
+                    <span class="order-id">à¤‘à¤°à¥à¤¡à¤° #${order.id}</span>
+                    <span class="order-total">â‚¹${order.total}</span>
+                </div>
+                <div class="order-details">
+                    <p><strong>à¤—à¥à¤°à¤¾à¤¹à¤•:</strong> ${order.customerName}</p>
+                    <p><strong>à¤®à¥‹à¤¬à¤¾à¤‡à¤²:</strong> ${order.customerMobile}</p>
+                    <p><strong>à¤ªà¤¤à¤¾:</strong> ${order.customerAddress}</p>
+                    <p><strong>à¤¦à¤¿à¤¨à¤¾à¤‚à¤•:</strong> ${new Date(order.date).toLocaleString('hi-IN')}</p>
+                    <div class="order-items">
+                        <strong>à¤†à¤‡à¤Ÿà¤®:</strong>
+                        ${order.items.map(item => `
+                            <div>${item.productName} x ${item.quantity} = â‚¹${item.total}</div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderAdminCustomers() {
+        const container = document.getElementById('adminCustomersList');
+        const users = this.dataManager.getUsers();
+
+        if (users.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>à¤•à¥‹à¤ˆ à¤—à¥à¤°à¤¾à¤¹à¤• à¤ªà¤‚à¤œà¥€à¤•à¥ƒà¤¤ à¤¨à¤¹à¥€à¤‚</h3>
+                    <p>à¤œà¤¬ à¤—à¥à¤°à¤¾à¤¹à¤• à¤¸à¤¾à¤‡à¤¨ à¤…à¤ª à¤•à¤°à¥‡à¤‚à¤—à¥‡ à¤¤à¥‹ à¤µà¥‡ à¤¯à¤¹à¤¾à¤ à¤¦à¤¿à¤–à¥‡à¤‚à¤—à¥‡</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = users.map(user => `
+            <div class="admin-customer-item">
+                <div class="admin-customer-header">
+                    <span class="customer-name">${user.name}</span>
+                    <span class="customer-email">${user.email}</span>
+                </div>
+                <p><strong>à¤®à¥‹à¤¬à¤¾à¤‡à¤²:</strong> ${user.mobile}</p>
+            </div>
+        `).join('');
+    }
+
+    handleAddProduct() {
+        const name = document.getElementById('newProductName').value.trim();
+        const price = parseInt(document.getElementById('newProductPrice').value);
+        const category = document.getElementById('newProductCategory').value;
+        const image = document.getElementById('newProductImage').value.trim();
+        const description = document.getElementById('newProductDescription').value.trim();
+
+        // Validation
+        if (!name || !price || !image || !description) {
+            this.showMessage('à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¸à¤­à¥€ à¤«à¤¼à¥€à¤²à¥à¤¡ à¤­à¤°à¥‡à¤‚', 'error');
+            return;
+        }
+
+        if (price <= 0) {
+            this.showMessage('à¤•à¥ƒà¤ªà¤¯à¤¾ à¤¸à¤¹à¥€ à¤¦à¤¾à¤® à¤¦à¤°à¥à¤œ à¤•à¤°à¥‡à¤‚', 'error');
+            return;
+        }
+
+        const product = { name, price, category, image, description };
+        this.dataManager.addProduct(product);
+        
+        this.hideModal('addProductModal');
+        this.renderAdminProducts();
+        this.showMessage('à¤¨à¤¯à¤¾ à¤‰à¤¤à¥à¤ªà¤¾à¤¦ à¤œà¥‹à¤¡à¤¼à¤¾ à¤—à¤¯à¤¾', 'success');
+        
+        // Reset form
+        document.getElementById('addProductForm').reset();
+    }
+
+    deleteProduct(id) {
+        if (confirm('à¤•à¥à¤¯à¤¾ à¤†à¤ª à¤µà¤¾à¤•à¤ˆ à¤‡à¤¸ à¤‰à¤¤à¥à¤ªà¤¾à¤¦ à¤•à¥‹ à¤¡à¤¿à¤²à¥€à¤Ÿ à¤•à¤°à¤¨à¤¾ à¤šà¤¾à¤¹à¤¤à¥‡ à¤¹à¥ˆà¤‚?')) {
+            this.dataManager.deleteProduct(id);
+            this.renderAdminProducts();
+            this.showMessage('à¤‰à¤¤à¥à¤ªà¤¾à¤¦ à¤¡à¤¿à¤²à¥€à¤Ÿ à¤•à¤¿à¤¯à¤¾ à¤—à¤¯à¤¾', 'success');
+        }
+    }
+
+    showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('hidden');
+        // Focus the first input in the modal
+        const firstInput = modal.querySelector('input, textarea, select');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+
+    hideModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    showMessage(text, type = 'info') {
+        const existingMessage = document.querySelector('.message');
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+
+        const message = document.createElement('div');
+        message.className = `message message--${type}`;
+        message.textContent = text;
+        message.style.position = 'fixed';
+        message.style.top = '20px';
+        message.style.right = '20px';
+        message.style.zIndex = '10000';
+        message.style.maxWidth = '300px';
+        
+        document.body.appendChild(message);
+        
+        setTimeout(() => {
+            if (message.parentNode) {
+                message.remove();
+            }
+        }, 4000);
+    }
 }
-q("#productForm").onsubmit = e=>{
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(e.target).entries());
-  const products = getProducts();
-  if(data.id){ // edit
-    const id = +data.id;
-    const i = products.findIndex(x=>x.id===id);
-    products[i] = { id, name:data.name, price:+data.price, category:data.category, image:data.image, description:data.description };
-  }else{ // add
-    const id = Math.max(0,...products.map(x=>x.id))+1;
-    products.push({ id, name:data.name, price:+data.price, category:data.category, image:data.image, description:data.description });
-  }
-  ls.set("nx_products", products);
-  productDialog.close();
-  renderAdmin(); renderProducts();
-};
 
-// Search & actions
-q("#searchBtn").onclick = renderProducts;
-q("#shopNowBtn").onclick = ()=> { state.filter=null; q("#searchInput").value=""; renderProducts(); }
-q(".brand").onclick = ()=> show("home");
-q("#cartOpenBtn").onclick = ()=> { renderCart(); show("cart"); };
-q("#goToCustomer").onclick = ()=> { if(getCart().length){ show("customer"); } };
-
-q("#goHomeAfterOrder").onclick = ()=> show("home");
-
-// Footer year
-q("#year").textContent = new Date().getFullYear();
-
-// Initial
-renderProducts();
-updateCartBadge();
-show("home");
+// Initialize app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = new NexaaraApp();
+});
